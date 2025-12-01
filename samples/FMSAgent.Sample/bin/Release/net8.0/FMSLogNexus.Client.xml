@@ -1,0 +1,476 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FMSLogNexus.Client</name>
+    </assembly>
+    <members>
+        <member name="T:FMSLogNexus.Client.LogClient">
+            <summary>
+            Client for sending log entries to FMS Log Nexus.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.LogClient.CreateAsync(FMSLogNexus.Client.Models.CreateLogRequest,System.Threading.CancellationToken)">
+            <summary>
+            Creates a single log entry immediately.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.LogClient.CreateBatchAsync(System.Collections.Generic.IEnumerable{FMSLogNexus.Client.Models.CreateLogRequest},System.Threading.CancellationToken)">
+            <summary>
+            Creates multiple log entries in a batch.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.LogClient.GetByIdAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets a log entry by ID.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.LogClient.LogAsync(FMSLogNexus.Client.LogLevel,System.String,System.String,System.Nullable{System.Guid},System.Collections.Generic.Dictionary{System.String,System.Object},System.Threading.CancellationToken)">
+            <summary>
+            Logs a message at the specified level.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.LogClient.TraceAsync(System.String,System.String,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>
+            Logs a trace message.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.LogClient.DebugAsync(System.String,System.String,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>
+            Logs a debug message.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.LogClient.InfoAsync(System.String,System.String,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>
+            Logs an information message.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.LogClient.WarnAsync(System.String,System.String,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>
+            Logs a warning message.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.LogClient.ErrorAsync(System.String,System.Exception,System.String,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>
+            Logs an error message.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.LogClient.CriticalAsync(System.String,System.Exception,System.String,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>
+            Logs a critical message.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.LogClient.Enqueue(FMSLogNexus.Client.Models.CreateLogRequest)">
+            <summary>
+            Enqueues a log entry for buffered sending.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.LogClient.Enqueue(FMSLogNexus.Client.LogLevel,System.String,System.String,System.Nullable{System.Guid},System.Collections.Generic.Dictionary{System.String,System.Object})">
+            <summary>
+            Enqueues a log message for buffered sending.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.LogClient.BufferCount">
+            <summary>
+            Gets the number of buffered log entries.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.LogClient.FlushAsync(System.Threading.CancellationToken)">
+            <summary>
+            Flushes all buffered log entries.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.ServerClient">
+            <summary>
+            Client for server operations.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.ServerClient.HeartbeatAsync(FMSLogNexus.Client.ServerStatus,FMSLogNexus.Client.Models.SystemInfo,System.Threading.CancellationToken)">
+            <summary>
+            Sends a heartbeat to the server.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.ServerClient.GetAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets server details.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.ServerClient.GetAllAsync(System.Threading.CancellationToken)">
+            <summary>
+            Gets all servers.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.ServerClient.GetSystemInfo">
+            <summary>
+            Collects current system information.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.JobClient">
+            <summary>
+            Client for job operations.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.JobClient.RegisterAsync(FMSLogNexus.Client.Models.RegisterJobRequest,System.Threading.CancellationToken)">
+            <summary>
+            Registers a new job or updates an existing one.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.JobClient.GetAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets job details.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.JobClient.GetByServerAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets all jobs for a server.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.JobClient.ActivateAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Activates a job.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.JobClient.DeactivateAsync(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Deactivates a job.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.ExecutionClient">
+            <summary>
+            Client for execution operations.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.ExecutionClient.StartAsync(System.String,FMSLogNexus.Client.TriggerType,System.String,System.Collections.Generic.Dictionary{System.String,System.Object},System.Threading.CancellationToken)">
+            <summary>
+            Starts a new job execution.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.ExecutionClient.CompleteSuccessAsync(System.Guid,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Completes a job execution with success.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.ExecutionClient.CompleteFailureAsync(System.Guid,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Completes a job execution with failure.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.ExecutionClient.CancelAsync(System.Guid,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Cancels a running execution.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.ExecutionClient.GetAsync(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets execution details.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.ExecutionClient.GetRunningAsync(System.Threading.CancellationToken)">
+            <summary>
+            Gets running executions.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.ExecutionClient.GetHistoryAsync(System.String,System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets execution history for a job.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.FMSLogNexusOptions">
+            <summary>
+            Configuration options for FMS Log Nexus client.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusOptions.BaseUrl">
+            <summary>
+            The base URL of the FMS Log Nexus API.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusOptions.ServerName">
+            <summary>
+            The server name to use for this agent.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusOptions.ApiKey">
+            <summary>
+            The API key for authentication.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusOptions.AccessToken">
+            <summary>
+            JWT access token for authentication.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusOptions.AgentVersion">
+            <summary>
+            The agent version to report.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusOptions.HeartbeatIntervalSeconds">
+            <summary>
+            Interval in seconds between heartbeats.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusOptions.LogFlushIntervalSeconds">
+            <summary>
+            Interval in seconds between log flushes.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusOptions.MaxBatchSize">
+            <summary>
+            Maximum number of logs to batch before sending.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusOptions.HttpTimeoutSeconds">
+            <summary>
+            Timeout in seconds for HTTP requests.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusOptions.RetryAttempts">
+            <summary>
+            Number of retry attempts for failed requests.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusOptions.RetryDelayMs">
+            <summary>
+            Delay in milliseconds between retry attempts.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusOptions.EnableRealTimeUpdates">
+            <summary>
+            Enable real-time updates via SignalR.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusOptions.EnableAutoHeartbeat">
+            <summary>
+            Enable automatic heartbeat sending.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusOptions.EnableLogBuffering">
+            <summary>
+            Enable buffered log sending.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.LogLevel">
+            <summary>
+            Log level enumeration matching server-side levels.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.ExecutionStatus">
+            <summary>
+            Execution status enumeration.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.ServerStatus">
+            <summary>
+            Server status enumeration.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.JobPriority">
+            <summary>
+            Job priority enumeration.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.TriggerType">
+            <summary>
+            Trigger type for job executions.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.ServiceCollectionExtensions">
+            <summary>
+            Extension methods for registering FMS Log Nexus services.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.ServiceCollectionExtensions.AddFMSLogNexus(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{FMSLogNexus.Client.FMSLogNexusOptions})">
+            <summary>
+            Adds FMS Log Nexus client services to the service collection.
+            </summary>
+            <param name="services">The service collection.</param>
+            <param name="configure">Configuration action for options.</param>
+            <returns>The service collection.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Client.ServiceCollectionExtensions.AddFMSLogNexus(Microsoft.Extensions.DependencyInjection.IServiceCollection,FMSLogNexus.Client.FMSLogNexusOptions)">
+            <summary>
+            Adds FMS Log Nexus client services with options instance.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.ServiceCollectionExtensions.AddFMSAgent(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds the FMS Agent background service for automatic heartbeats and log flushing.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.ServiceCollectionExtensions.AddFMSHeartbeat(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds the heartbeat background service.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.ServiceCollectionExtensions.AddFMSLogFlush(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Adds the log flush background service.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.ServiceCollectionExtensions.AddFMSLogNexusAgent(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{FMSLogNexus.Client.FMSLogNexusOptions})">
+            <summary>
+            Adds all FMS Log Nexus services including agent background services.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.FMSLogNexusClient">
+            <summary>
+            Main client for interacting with FMS Log Nexus API.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusClient.Logs">
+            <summary>
+            Log client for sending log entries.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusClient.Servers">
+            <summary>
+            Server client for heartbeats and server management.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusClient.Jobs">
+            <summary>
+            Job client for job registration and management.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusClient.Executions">
+            <summary>
+            Execution client for tracking job executions.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.FMSLogNexusClient.#ctor(FMSLogNexus.Client.FMSLogNexusOptions,Microsoft.Extensions.Logging.ILogger{FMSLogNexus.Client.FMSLogNexusClient})">
+            <summary>
+            Creates a new FMS Log Nexus client.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.FMSLogNexusClient.#ctor(Microsoft.Extensions.Options.IOptions{FMSLogNexus.Client.FMSLogNexusOptions},Microsoft.Extensions.Logging.ILogger{FMSLogNexus.Client.FMSLogNexusClient})">
+            <summary>
+            Creates a new FMS Log Nexus client with dependency injection.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.FMSLogNexusClient.SetAccessToken(System.String,System.Nullable{System.DateTime})">
+            <summary>
+            Sets the access token for authentication.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Client.FMSLogNexusClient.LoginAsync(System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Authenticates with username and password.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusClient.IsAuthenticated">
+            <summary>
+            Checks if the client is authenticated.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusClient.IsTokenExpired">
+            <summary>
+            Checks if the token is expired.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusClient.ServerName">
+            <summary>
+            Gets the server name from options.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Client.FMSLogNexusClient.AgentVersion">
+            <summary>
+            Gets the agent version from options.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.FMSLogNexusException">
+            <summary>
+            Exception thrown by FMS Log Nexus client.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.Models.CreateLogRequest">
+            <summary>
+            Request model for creating a log entry.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.Models.LogResponse">
+            <summary>
+            Response model for a log entry.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.Models.BatchLogResponse">
+            <summary>
+            Response model for batch log creation.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.Models.HeartbeatRequest">
+            <summary>
+            Request model for server heartbeat.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.Models.SystemInfo">
+            <summary>
+            System information for heartbeat.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.Models.ServerResponse">
+            <summary>
+            Response model for server details.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.Models.RegisterJobRequest">
+            <summary>
+            Request model for registering a job.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.Models.JobResponse">
+            <summary>
+            Response model for job details.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.Models.StartExecutionRequest">
+            <summary>
+            Request model for starting an execution.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.Models.CompleteExecutionRequest">
+            <summary>
+            Request model for completing an execution.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.Models.ExecutionResponse">
+            <summary>
+            Response model for execution details.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.Models.LoginRequest">
+            <summary>
+            Request model for login.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.Models.AuthResponse">
+            <summary>
+            Response model for authentication.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.Models.PagedResponse`1">
+            <summary>
+            Paginated response wrapper.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.Models.ApiError">
+            <summary>
+            API error response.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.HeartbeatService">
+            <summary>
+            Background service for sending periodic heartbeats.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.LogFlushService">
+            <summary>
+            Background service for flushing buffered logs.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Client.FMSAgentService">
+            <summary>
+            Combines heartbeat and log flush functionality.
+            </summary>
+        </member>
+    </members>
+</doc>

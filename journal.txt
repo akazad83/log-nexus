@@ -1,0 +1,1392 @@
+
+================================================================================
+STEP 13: REPOSITORY IMPLEMENTATIONS
+Completed: 2025-11-25
+================================================================================
+
+Files Created: 10 C# files + 1 documentation file
+Total Lines: 4,173 lines of C# code + 468 lines documentation
+Location: /mnt/user-data/outputs/fms-log-nexus/
+
+FILES:
+
+1. RepositoryBase.cs (364 lines)
+   - RepositoryBase<TEntity> for Guid keys
+   - RepositoryBase<TEntity, TKey> for any key type
+   - SoftDeleteRepositoryBase<TEntity, TKey> for soft-delete support
+   - Common CRUD operations with AsNoTracking
+   - Pagination with validation (max 1000 per page)
+   - Include helpers for eager loading
+
+2. LogRepository.cs (735 lines)
+   - BulkInsertAsync: Batch insert (1000 per batch)
+   - StreamInsertAsync: Streaming for large batches
+   - SearchAsync: Comprehensive filtering
+   - FullTextSearchAsync: Message text search
+   - GetByCorrelationIdAsync/GetByTraceIdAsync: Distributed tracing
+   - GetByJobExecutionAsync: Execution logs
+   - GetCountsByLevelAsync: Level aggregation
+   - GetTrendDataAsync: Time-series data (Minute/Hour/Day/Week/Month)
+   - GetTopExceptionsAsync: Exception analysis
+   - GetSummaryAsync: Statistics summary
+   - DeleteOldLogsAsync: Batch deletion with delay
+   - ExportAsync: Async streaming export
+
+3. JobRepository.cs (449 lines)
+   - SearchAsync: Multi-field search with sorting
+   - GetWithRecentExecutionsAsync: Eager load executions
+   - GetByServerAsync/GetByCategoryAsync: Filtered queries
+   - GetCriticalJobsAsync/GetFailedJobsAsync/GetStaleJobsAsync
+   - GetJobHealthAsync: Health scores for all jobs
+   - CalculateHealthScore: 100-point health algorithm
+   - RegisterOrUpdateAsync: Upsert pattern
+   - UpdateStatisticsAsync: Post-execution stats
+   - ActivateAsync/DeactivateAsync
+
+4. JobExecutionRepository.cs (558 lines)
+   - SearchAsync: Comprehensive execution search
+   - GetWithJobAsync/GetWithLogCountsAsync: Eager loading
+   - GetByJobAsync: Paginated by job
+   - GetByCorrelationIdAsync: Trace support
+   - GetRunningAsync: All running executions
+   - GetRunningByServerAsync: Server-specific running
+   - GetOverdueAsync: Timeout detection
+   - GetRecentFailuresAsync: Failure analysis
+   - GetConsecutiveFailureCountAsync: Alert support
+   - GetCountsByStatusAsync/GetStatisticsAsync: Analytics
+   - GetTrendDataAsync: Execution trends
+   - StartAsync/CompleteAsync: Lifecycle management
+   - IncrementLogCountAsync/IncrementLogCountsAsync
+   - TimeoutStuckExecutionsAsync: Auto-timeout
+   - DeleteOldExecutionsAsync: Retention with minimum keep
+
+5. ServerRepository.cs (267 lines)
+   - GetActiveServersAsync/GetByStatusAsync
+   - GetWithJobsAsync/GetWithRunningExecutionsAsync
+   - ProcessHeartbeatAsync: Heartbeat handling (upsert)
+   - MarkOfflineServersAsync: Batch offline marking
+   - GetUnresponsiveAsync: Timeout detection
+   - GetStatusSummaryAsync: Status distribution
+   - ActivateAsync/DeactivateAsync/SetMaintenanceModeAsync
+   - RegisterOrUpdateAsync: Server registration
+
+6. AlertRepositories.cs (426 lines)
+   AlertRepository:
+   - GetActiveAlertsAsync/GetByTypeAsync
+   - GetByJobAsync/GetByServerAsync
+   - GetWithRecentInstancesAsync: Eager load instances
+   - GetAlertsNeedingEvaluationAsync: Throttle-aware
+   - ActivateAsync/DeactivateAsync
+   - RecordTriggerAsync: Update trigger stats
+   
+   AlertInstanceRepository:
+   - SearchAsync: Full filtering
+   - GetActiveInstancesAsync/GetUnacknowledgedAsync
+   - GetByAlertAsync: Instance history
+   - AcknowledgeAsync/ResolveAsync/SuppressAsync
+   - BulkAcknowledgeAsync/BulkResolveAsync
+   - GetCountsByStatusAsync/GetCountsBySeverityAsync
+   - GetSummaryAsync: Dashboard summary
+   - DeleteOldInstancesAsync: Retention
+
+7. AuthRepositories.cs (537 lines)
+   UserRepository:
+   - GetByUsernameAsync/GetByEmailAsync
+   - GetByRoleAsync/SearchAsync
+   - GetWithApiKeysAsync: Eager load keys
+   - IsUsernameAvailableAsync/IsEmailAvailableAsync
+   - ActivateAsync/DeactivateAsync/UnlockAsync
+   - RecordLoginAsync: Track login attempts
+   - GetStatisticsAsync: User distribution
+   
+   ApiKeyRepository:
+   - GetByKeyHashAsync/GetByPrefixAsync
+   - GetByUserAsync/GetByServerAsync
+   - GetExpiringAsync: Expiration alerts
+   - RevokeAsync/RevokeAllByUserAsync
+   - RecordUsageAsync: Usage tracking
+   - IsValidAsync: Key validation
+   
+   RefreshTokenRepository:
+   - GetByTokenHashAsync
+   - GetByUserAsync/GetActiveByUserAsync
+   - RevokeAsync/RevokeAllByUserAsync
+   - RotateAsync: Token rotation pattern
+   - IsValidAsync/DeleteExpiredAsync
+
+8. SystemRepositories.cs (470 lines)
+   SystemConfigurationRepository:
+   - GetValueAsync<T>: Typed config retrieval
+   - SetValueAsync<T>: Typed config update
+   - GetAllAsync/GetByCategoryAsync
+   - GetDistinctCategoriesAsync
+   - CreateOrUpdateAsync: Upsert config
+   - Standard settings: LogRetentionDays, HeartbeatTimeout, etc.
+   
+   AuditLogRepository:
+   - SearchAsync: Full audit search
+   - GetByUserAsync/GetByEntityAsync
+   - GetRecentAsync/GetLoginHistoryAsync
+   - LogAsync: Generic logging
+   - LogCreateAsync/LogUpdateAsync/LogDeleteAsync
+   - DeleteOldEntriesAsync: Retention
+   - GetDistinctActionsAsync/GetDistinctEntityTypesAsync
+
+9. UnitOfWork.cs (275 lines)
+   - Lazy-loaded repository instances
+   - All 11 repository properties
+   - SaveChangesAsync/SaveChangesWithAuditAsync
+   - BeginTransactionAsync: Manual transactions
+   - ExecuteInTransactionAsync<T>: Wrapped transactions
+   - ExecuteSqlAsync: Raw SQL execution
+   - QuerySqlAsync<T>: Dapper-based queries
+   - ClearChangeTracker/HasChanges
+   - Proper IDisposable/IAsyncDisposable
+
+10. RepositoryServiceExtensions.cs (92 lines)
+    - AddRepositories: All individual repos
+    - AddUnitOfWork: UoW only
+    - AddDataAccessLayer: DbContext + repos
+    - AddDataAccessLayerWithPooling: High-performance
+
+UPDATED FILES:
+- FMSLogNexus.Infrastructure.csproj: Added Dapper 2.1.35
+
+DOCUMENTATION:
+- REPOSITORY_IMPLEMENTATIONS.md (468 lines)
+  - Architecture diagram
+  - File structure
+  - All repository method tables
+  - Usage examples
+  - Performance considerations
+  - Best practices
+
+KEY DESIGN DECISIONS:
+1. Lazy Loading: Repositories created on first access
+2. No-Tracking Default: All read queries use AsNoTracking()
+3. Batch Processing: Large operations split into batches of 1000
+4. Streaming: AsyncEnumerable for large exports
+5. Transaction Support: ExecuteInTransactionAsync for atomic operations
+6. Dapper Integration: QuerySqlAsync for complex raw queries
+7. Health Scoring: 100-point algorithm with configurable deductions
+8. Audit Integration: LogCreateAsync/LogUpdateAsync/LogDeleteAsync
+9. Throttle Support: GetAlertsNeedingEvaluationAsync respects throttle
+
+DEPENDENCIES ADDED:
+- Dapper 2.1.35 (for raw SQL queries in UnitOfWork)
+
+TRANSCRIPT:
+Full implementation details in: /mnt/transcripts/2025-11-25-step13-repository-implementations.txt
+
+NEXT STEPS:
+Step 14: Service Implementations
+- Implement all 16 service interfaces from Step 11
+- Add business logic, validation, caching
+- Add transaction management
+- Add error handling and audit logging
+
+================================================================================
+STEP 14: SERVICE IMPLEMENTATIONS
+Completed: 2025-11-26
+================================================================================
+
+Files Created: 10 C# service implementation files
+Total Lines: 4,272 lines of C# code
+Location: /mnt/user-data/outputs/fms-log-nexus/src/FMSLogNexus.Infrastructure/Services/
+
+FILES:
+
+1. ServiceBase.cs (192 lines)
+   - Base class for all services
+   - ExecuteAsync: Standard error handling wrapper
+   - ExecuteInTransactionAsync: Transaction wrapper
+   - SaveChangesAsync / SaveChangesWithAuditAsync
+   - ServiceResult<T> / ServiceResult: Operation result types
+   - ErrorCodes: Common error code constants
+
+2. LogService.cs (471 lines)
+   - ILogService implementation
+   - CreateLogAsync: Single log ingestion with real-time broadcast
+   - CreateBatchAsync: Batch ingestion with execution log count updates
+   - IngestStreamAsync: Streaming ingestion for large batches
+   - GetByIdAsync / GetDetailAsync: Query operations
+   - SearchAsync: Full-text search with pagination
+   - GetByCorrelationIdAsync / GetByTraceIdAsync: Distributed tracing
+   - GetByJobExecutionAsync / GetRecentErrorsAsync
+   - GetStatisticsAsync / GetTrendAsync / GetCountsByLevelAsync
+   - ExportAsync / ExportToStreamAsync: CSV export
+
+3. JobService.cs (421 lines)
+   - IJobService implementation
+   - CreateJobAsync / UpdateJobAsync / DeleteJobAsync
+   - GetJobAsync / GetJobDetailAsync with health score
+   - SearchJobsAsync: Multi-field search
+   - RegisterJobAsync: Upsert pattern for agent registration
+   - ActivateJobAsync / DeactivateJobAsync
+   - GetByServerAsync / GetByCategoryAsync / GetCriticalJobsAsync
+   - GetJobHealthAsync / GetAllJobHealthAsync: Health monitoring
+   - GetStatisticsSummaryAsync / GetLookupItemsAsync
+
+4. JobExecutionService.cs (396 lines)
+   - IJobExecutionService implementation
+   - StartExecutionAsync: Creates execution, prevents duplicate runs
+   - CompleteExecutionAsync: Updates job stats, triggers alerts
+   - CancelExecutionAsync
+   - GetExecutionAsync / GetExecutionDetailAsync
+   - SearchAsync / GetByJobAsync / GetRecentByJobAsync
+   - GetRunningAsync / GetRunningByServerAsync / IsJobRunningAsync
+   - GetOverdueAsync / GetRecentFailuresAsync
+   - GetStatisticsAsync / GetTrendAsync
+   - TimeoutStuckExecutionsAsync: Maintenance
+
+5. ServerService.cs (355 lines)
+   - IServerService implementation
+   - CreateServerAsync / UpdateServerAsync / DeleteServerAsync
+   - GetServerAsync / GetServerDetailAsync: With jobs and running executions
+   - GetAllServersAsync / GetByStatusAsync
+   - ProcessHeartbeatAsync: Heartbeat handling with real-time broadcast
+   - MarkOfflineServersAsync / GetUnresponsiveAsync
+   - ActivateServerAsync / DeactivateServerAsync
+   - SetMaintenanceModeAsync
+   - GetStatusSummaryAsync / GetLookupItemsAsync
+
+6. AlertService.cs (503 lines)
+   - IAlertService implementation
+   - CreateAlertAsync / UpdateAlertAsync / DeleteAlertAsync
+   - GetAlertAsync / GetAlertDetailAsync
+   - GetAllAlertsAsync / GetAlertsByTypeAsync / GetAlertsByJobAsync
+   - ActivateAlertAsync / DeactivateAlertAsync
+   - SearchInstancesAsync / GetActiveInstancesAsync / GetUnacknowledgedAsync
+   - AcknowledgeInstanceAsync / ResolveInstanceAsync
+   - BulkAcknowledgeAsync / BulkResolveAsync
+   - TriggerAlertAsync: Creates instance, sends notifications
+   - EvaluateJobFailureAsync / EvaluateErrorThresholdAsync
+
+7. AuthServices.cs (853 lines)
+   AuthService:
+   - LoginAsync: Password verification, token generation, audit
+   - RefreshTokenAsync: Token rotation
+   - LogoutAsync / LogoutAllSessionsAsync
+   - ChangePasswordAsync / ResetPasswordAsync
+   - AuthenticateApiKeyAsync: API key validation
+   - ValidateTokenAsync / GetCurrentUserAsync
+   
+   UserService:
+   - CreateUserAsync / GetUserAsync / UpdateUserAsync / DeleteUserAsync
+   - GetUserByUsernameAsync / SearchUsersAsync
+   - ActivateUserAsync / DeactivateUserAsync / UnlockUserAsync
+   - GetPreferencesAsync / UpdatePreferencesAsync
+   - IsUsernameAvailableAsync / IsEmailAvailableAsync
+   
+   ApiKeyService:
+   - CreateApiKeyAsync: Generates key with prefix
+   - GetApiKeyAsync / GetUserApiKeysAsync
+   - RevokeApiKeyAsync / RevokeAllUserApiKeysAsync
+   - GetExpiringApiKeysAsync
+
+8. TokenService.cs (170 lines)
+   - ITokenService implementation
+   - GenerateAccessToken: JWT creation with claims
+   - ValidateAccessToken: Full validation with expiry check
+   - GetPrincipalFromExpiredToken: For refresh flow
+   - GetAccessTokenExpirationMinutes / GetRefreshTokenExpirationDays
+
+9. DashboardService.cs (387 lines)
+   - IDashboardService implementation
+   - GetSummaryAsync: Aggregated stats with caching
+   - GetLogTrendAsync / GetExecutionTrendAsync
+   - GetRecentErrorsAsync / GetRecentFailuresAsync
+   - GetJobHealthOverviewAsync / GetActiveAlertsAsync
+   - GetRunningJobsAsync / GetServerStatusesAsync
+   - Response DTOs for dashboard widgets
+
+10. SystemServices.cs (524 lines)
+    ConfigurationService:
+    - GetValueAsync<T> / SetValueAsync: Typed config with caching
+    - GetAllAsync / GetByCategoryAsync / GetCategoriesAsync
+    - CreateOrUpdateAsync: Config management with audit
+    
+    AuditService:
+    - SearchAsync: Full audit search with pagination
+    - GetByUserAsync / GetByEntityAsync / GetRecentAsync
+    - GetLoginHistoryAsync
+    - LogAsync: Generic audit logging
+    - GetDistinctActionsAsync / GetDistinctEntityTypesAsync
+    
+    MaintenanceService:
+    - RunLogCleanupAsync: Delete old logs
+    - RunExecutionCleanupAsync: Delete old executions
+    - RunAlertCleanupAsync: Delete old alert instances
+    - RunAuditLogCleanupAsync: Delete old audit entries
+    - RunTokenCleanupAsync: Delete expired tokens
+    - RunServerHealthCheckAsync: Mark offline servers
+    - RunExecutionTimeoutCheckAsync: Timeout stuck jobs
+    - RunAllMaintenanceAsync: Run all maintenance tasks
+
+KEY DESIGN PATTERNS:
+
+1. Service Base Pattern
+   - All services inherit from ServiceBase
+   - Common error handling and logging
+   - Transaction management
+   - Audit integration
+
+2. Optional Dependencies
+   - Services accept optional dependencies (IRealTimeService, ICacheService)
+   - Graceful degradation when not configured
+   - Enables testing without all dependencies
+
+3. Result Types
+   - AuthResult<T> for authentication operations
+   - ServiceResult<T> for general operations
+   - MaintenanceResult for maintenance tasks
+
+4. Real-Time Integration
+   - Services broadcast events via IRealTimeService
+   - Log ingestion, job status, server status, alerts
+
+5. Caching Strategy
+   - Dashboard summary cached for 1 minute
+   - Configuration values cached for 5 minutes
+   - Cache invalidation on updates
+
+6. Security
+   - Password hashing with SHA256
+   - API key generation with secure random
+   - Token rotation on refresh
+   - Audit logging for sensitive operations
+
+SERVICES IMPLEMENTED:
+- ILogService ✅
+- IJobService ✅
+- IJobExecutionService ✅
+- IServerService ✅
+- IAlertService ✅
+- IAuthService ✅
+- IUserService ✅
+- IApiKeyService ✅
+- ITokenService ✅
+- IDashboardService ✅
+- IConfigurationService ✅
+- IAuditService ✅
+- IMaintenanceService ✅
+
+NEXT STEPS:
+Step 15: API Controllers
+- Implement REST endpoints
+- Add authentication middleware
+- Add validation
+- Add Swagger documentation
+
+================================================================================
+STEP 15: API CONTROLLERS
+Completed: 2025-11-26
+================================================================================
+
+Files Created: 17 files
+Total Lines: ~4,400 lines of C# code
+Location: /mnt/user-data/outputs/fms-log-nexus/src/FMSLogNexus.Api/
+
+CONTROLLERS (10 files, 3,574 lines):
+
+1. ApiControllerBase.cs (189 lines)
+   - Base class for all API controllers
+   - CurrentUserId, CurrentUsername, CurrentRole properties
+   - ClientIpAddress, ClientUserAgent helpers
+   - NotFoundResponse, BadRequestResponse, ConflictResponse helpers
+   - ForbiddenResponse, UnauthorizedResponse helpers
+   - HasRole, IsAdmin, CanManageUser authorization helpers
+   - ApiResponse<T> and ApiResponse wrapper classes
+
+2. LogsController.cs (390 lines)
+   Route: /api/v1/logs
+   Endpoints:
+   - POST /             - Create single log (LogIngestion policy)
+   - POST /batch        - Create batch logs (LogIngestion policy)
+   - GET /{id}          - Get log by ID
+   - GET /{id}/detail   - Get detailed log with related logs
+   - GET /              - Search logs with pagination
+   - GET /correlation/{id} - Get logs by correlation ID
+   - GET /trace/{id}    - Get logs by trace ID
+   - GET /execution/{id} - Get logs for job execution
+   - GET /errors/recent - Get recent error logs
+   - GET /statistics    - Get log statistics
+   - GET /trend         - Get log volume trend
+   - GET /counts-by-level - Get counts by log level
+   - GET /lookup/servers|jobs|categories|tags - Lookups
+   - GET /export        - Export logs as CSV (LogExport policy)
+
+3. JobsController.cs (412 lines)
+   Route: /api/v1/jobs
+   Endpoints:
+   - POST /              - Create job (JobWrite policy)
+   - GET /{jobId}        - Get job by ID
+   - GET /{jobId}/detail - Get detailed job with executions
+   - PUT /{jobId}        - Update job
+   - DELETE /{jobId}     - Delete (deactivate) job
+   - GET /               - Search jobs with pagination
+   - POST /register      - Register job (for agents)
+   - POST /{jobId}/activate|deactivate - Toggle job status
+   - GET /by-server/{name} - Jobs by server
+   - GET /by-category/{cat} - Jobs by category
+   - GET /critical       - Critical jobs
+   - GET /failed         - Failed jobs
+   - GET /{jobId}/health - Job health info
+   - GET /health         - All jobs health
+   - GET /statistics     - Job statistics summary
+   - GET /lookup/categories|tags|items - Lookups
+
+4. ExecutionsController.cs (437 lines)
+   Route: /api/v1/executions
+   Endpoints:
+   - POST /              - Start execution (ExecutionWrite policy)
+   - POST /{id}/complete - Complete execution
+   - POST /{id}/cancel   - Cancel execution
+   - GET /{id}           - Get execution by ID
+   - GET /{id}/detail    - Get detailed execution
+   - GET /               - Search executions with pagination
+   - GET /by-job/{id}    - Executions for job with pagination
+   - GET /by-job/{id}/recent - Recent executions for job
+   - GET /by-job/{id}/last - Last execution for job
+   - GET /running        - All running executions
+   - GET /running/by-server/{name} - Running by server
+   - GET /is-running/{id} - Check if job is running
+   - GET /overdue        - Overdue executions
+   - GET /failures/recent - Recent failures
+   - GET /failures/consecutive/{id} - Consecutive failures
+   - GET /statistics/{id} - Execution statistics
+   - GET /trend          - Execution trend
+   - GET /counts-by-status - Counts by status
+
+5. ServersController.cs (335 lines)
+   Route: /api/v1/servers
+   Endpoints:
+   - POST /              - Create server (ServerWrite policy)
+   - GET /{name}         - Get server by name
+   - GET /{name}/detail  - Get detailed server
+   - PUT /{name}         - Update server
+   - DELETE /{name}      - Delete (deactivate) server
+   - GET /               - Get all servers
+   - GET /by-status/{status} - Servers by status
+   - POST /heartbeat     - Process heartbeat (Heartbeat policy)
+   - GET /unresponsive   - Unresponsive servers
+   - POST /{name}/activate|deactivate - Toggle status
+   - POST /{name}/maintenance - Set maintenance mode
+   - GET /statistics/summary - Status summary
+   - GET /lookup/items   - Server lookup items
+
+6. AlertsController.cs (478 lines)
+   Route: /api/v1/alerts
+   Endpoints:
+   - POST /              - Create alert rule (AlertWrite policy)
+   - GET /{id}           - Get alert by ID
+   - GET /{id}/detail    - Get detailed alert with instances
+   - PUT /{id}           - Update alert
+   - DELETE /{id}        - Delete (deactivate) alert
+   - GET /               - Get all alerts
+   - GET /by-type/{type} - Alerts by type
+   - GET /by-job/{id}    - Alerts for job
+   - POST /{id}/activate|deactivate - Toggle status
+   - GET /instances      - Search alert instances
+   - GET /instances/active - Active instances
+   - GET /instances/unacknowledged - Unacknowledged instances
+   - GET /instances/{id} - Get instance by ID
+   - POST /instances/{id}/acknowledge - Acknowledge
+   - POST /instances/{id}/resolve - Resolve
+   - POST /instances/bulk-acknowledge - Bulk acknowledge
+   - POST /instances/bulk-resolve - Bulk resolve
+   - GET /instances/summary - Instance summary
+   - POST /trigger       - Manual trigger (testing)
+
+7. AuthController.cs (207 lines)
+   Route: /api/v1/auth
+   Endpoints:
+   - POST /login         - Login (Anonymous)
+   - POST /refresh       - Refresh token (Anonymous)
+   - POST /logout        - Logout (Authenticated)
+   - POST /logout-all    - Logout all sessions
+   - POST /change-password - Change password
+   - GET /me             - Get current user
+   - POST /validate      - Validate token (Anonymous)
+
+8. UsersController.cs (513 lines)
+   Route: /api/v1/users
+   Endpoints:
+   - POST /              - Create user (Admin policy)
+   - GET /{id}           - Get user by ID
+   - PUT /{id}           - Update user
+   - DELETE /{id}        - Delete user (Admin)
+   - GET /               - Search users (Admin)
+   - POST /{id}/activate|deactivate - Toggle status (Admin)
+   - POST /{id}/unlock   - Unlock user (Admin)
+   - POST /{id}/reset-password - Reset password (Admin)
+   - GET /{id}/preferences - Get preferences
+   - PUT /{id}/preferences - Update preferences
+   - POST /{id}/api-keys - Create API key
+   - GET /{id}/api-keys/{keyId} - Get API key
+   - GET /{id}/api-keys  - Get user's API keys
+   - DELETE /{id}/api-keys/{keyId} - Revoke API key
+   - DELETE /{id}/api-keys - Revoke all API keys
+   - GET /check-username - Check username availability
+   - GET /check-email    - Check email availability
+
+9. DashboardController.cs (171 lines)
+   Route: /api/v1/dashboard
+   Endpoints:
+   - GET /summary        - Dashboard summary with stats
+   - GET /log-trend      - Log volume trend
+   - GET /execution-trend - Execution trend
+   - GET /recent-errors  - Recent error logs
+   - GET /recent-failures - Recent job failures
+   - GET /job-health     - Job health overview
+   - GET /active-alerts  - Active alerts
+   - GET /running-jobs   - Currently running jobs
+   - GET /server-statuses - Server statuses
+
+10. SystemController.cs (442 lines)
+    Route: /api/v1/system
+    Configuration Endpoints (Admin):
+    - GET /config         - All configuration
+    - GET /config/category/{cat} - By category
+    - GET /config/{key}   - Get value
+    - PUT /config/{key}   - Set value
+    - POST /config        - Create/update config
+    - GET /config/categories - Categories list
+    
+    Audit Endpoints (Admin):
+    - GET /audit          - Search audit log
+    - GET /audit/by-user/{id} - Audit by user
+    - GET /audit/by-entity/{type}/{id} - Audit by entity
+    - GET /audit/recent   - Recent audit entries
+    - GET /audit/logins   - Login history
+    - GET /audit/actions  - Distinct actions
+    - GET /audit/entity-types - Distinct entity types
+    
+    Maintenance Endpoints (Admin):
+    - POST /maintenance/cleanup/logs|executions|alerts|audit|tokens
+    - POST /maintenance/health-check/servers|executions
+    - POST /maintenance/run-all - Run all maintenance
+    
+    Health:
+    - GET /health         - Health check (Anonymous)
+
+AUTHENTICATION (1 file, 117 lines):
+
+11. ApiKeyAuthenticationHandler.cs (117 lines)
+    - Custom authentication handler for X-Api-Key header
+    - Validates API key via IAuthService
+    - Creates claims principal from authenticated user
+    - ApiKeyAuthenticationOptions configuration
+    - Extension methods for registration
+
+MIDDLEWARE (3 files, 423 lines):
+
+12. ExceptionHandlingMiddleware.cs (135 lines)
+    - Global exception handling
+    - Maps exception types to HTTP status codes
+    - Creates ProblemDetails responses
+    - Includes stack trace in development
+    - Adds trace ID for correlation
+
+13. RequestLoggingMiddleware.cs (88 lines)
+    - Logs HTTP requests and responses
+    - Includes request ID, method, path, client IP
+    - Logs response status code and elapsed time
+    - Log level based on status code
+
+14. RateLimitingMiddleware.cs (200 lines)
+    - In-memory rate limiting
+    - Per-user or per-IP tracking
+    - Configurable limits per endpoint type
+    - Higher limits for log ingestion
+    - Rate limit headers (X-RateLimit-*)
+    - 429 Too Many Requests responses
+
+CONFIGURATION (3 files):
+
+15. Program.cs (268 lines)
+    - Service registration (DI setup)
+    - JWT authentication configuration
+    - Authorization policies
+    - CORS configuration
+    - Swagger/OpenAPI setup
+    - Health checks
+    - Middleware pipeline
+
+16. appsettings.json
+    - Connection string
+    - JWT settings
+    - CORS origins
+    - Rate limiting config
+    - Logging configuration
+
+17. appsettings.Development.json
+    - Development-specific overrides
+    - Extended token expiration
+    - Disabled rate limiting
+    - Debug logging
+
+PROJECT FILE:
+
+18. FMSLogNexus.Api.csproj
+    - .NET 8.0 Web SDK
+    - Package references (JWT, Swagger, Serilog, etc.)
+    - Project references to Core and Infrastructure
+
+AUTHORIZATION POLICIES:
+- Admin: Admin role only
+- Operator: Admin, Operator roles
+- Viewer: Admin, Operator, Viewer roles
+- Agent: Admin, Agent roles
+- LogIngestion: Admin, Agent roles
+- LogRead: Admin, Operator, Viewer, Agent roles
+- LogExport: Admin, Operator roles
+- JobRead/Write: Role-based access
+- ExecutionRead/Write: Role-based access
+- ServerRead/Write: Role-based access
+- Heartbeat: Admin, Agent roles
+- AlertRead/Write: Role-based access
+
+TOTAL API ENDPOINTS: 90+ endpoints across 10 controllers
+
+NEXT STEPS:
+Step 16: SignalR Hubs for Real-Time Communication
+- Real-time log streaming
+- Job execution updates
+- Server status updates
+- Alert notifications
+
+
+================================================================================
+STEP 16: SIGNALR HUBS FOR REAL-TIME COMMUNICATION
+Completed: 2025-11-26
+================================================================================
+
+Files Created: 10 files (9 C# + 1 TypeScript)
+Total Lines: ~3,082 lines
+Location: /mnt/user-data/outputs/fms-log-nexus/src/FMSLogNexus.Api/Hubs/
+
+HUB FILES:
+
+1. HubInterfaces.cs (398 lines)
+   Client Interfaces:
+   - ILogHubClient: ReceiveLog, ReceiveLogBatch, ReceiveLogStats
+   - IJobHubClient: ExecutionStarted/Completed/Progress, JobStatusChanged, JobHealthUpdated
+   - IServerHubClient: ServerStatusChanged, ServerHeartbeat, ServerMetrics
+   - IAlertHubClient: AlertTriggered, AlertAcknowledged/Resolved, AlertSummaryUpdated
+   - IDashboardHubClient: DashboardUpdated, SystemNotification
+   
+   Notification DTOs:
+   - LogNotification, LogStatsNotification
+   - ExecutionNotification, ExecutionProgressNotification
+   - JobStatusNotification, JobHealthNotification
+   - ServerStatusNotification, ServerHeartbeatNotification, ServerMetricsNotification
+   - AlertNotification, AlertActionNotification, AlertSummaryNotification
+   - DashboardNotification (with sub-stats for logs, jobs, servers, alerts)
+   - SystemNotificationMessage
+   
+   Subscription Options:
+   - LogSubscriptionOptions, JobSubscriptionOptions
+   - ServerSubscriptionOptions, AlertSubscriptionOptions
+
+2. BaseHub.cs (260 lines)
+   - Abstract base class for all hubs
+   - CurrentUserId, CurrentUsername, CurrentRole properties
+   - ClientIpAddress helper
+   - OnConnectedAsync/OnDisconnectedAsync with logging
+   - JoinGroupAsync/LeaveGroupAsync helpers
+   - OthersInGroup helper
+   
+   IConnectionManager Interface:
+   - AddConnection/RemoveConnection
+   - GetConnections/GetConnectionsByHub
+   - GetConnectionCount/GetUserCount
+   - IsUserConnected/GetConnectedUsers
+   
+   ConnectionManager Implementation:
+   - Thread-safe in-memory connection tracking
+   - Per-user, per-hub connection management
+
+3. LogHub.cs (311 lines)
+   Route: /hubs/logs
+   
+   Subscription Methods:
+   - SubscribeToAllLogs/UnsubscribeFromAllLogs
+   - SubscribeToServer/UnsubscribeFromServer
+   - SubscribeToJob/UnsubscribeFromJob
+   - SubscribeToExecution/UnsubscribeFromExecution
+   - SubscribeToErrors/UnsubscribeFromErrors
+   - SubscribeWithFilter (custom filter options)
+   
+   Groups:
+   - logs:all, logs:errors, logs:stats
+   - logs:server:{name}, logs:job:{id}, logs:execution:{id}
+   
+   ILogBroadcaster/LogBroadcaster:
+   - BroadcastLogAsync: Single log to relevant groups
+   - BroadcastLogBatchAsync: Batch logs with grouping
+   - BroadcastLogStatsAsync: Statistics updates
+
+4. JobHub.cs (349 lines)
+   Route: /hubs/jobs
+   
+   Subscription Methods:
+   - SubscribeToAllJobs/UnsubscribeFromAllJobs
+   - SubscribeToAllExecutions/UnsubscribeFromAllExecutions
+   - SubscribeToJob/UnsubscribeFromJob
+   - SubscribeToExecution/UnsubscribeFromExecution
+   - SubscribeToServer/UnsubscribeFromServer
+   - SubscribeToCriticalJobs/UnsubscribeFromCriticalJobs
+   - SubscribeToHealthUpdates/UnsubscribeFromHealthUpdates
+   
+   Groups:
+   - jobs:all, executions:all, jobs:critical, jobs:health
+   - jobs:job:{id}, jobs:execution:{id}, jobs:server:{name}
+   
+   IJobBroadcaster/JobBroadcaster:
+   - BroadcastExecutionStartedAsync/BroadcastExecutionCompletedAsync
+   - BroadcastExecutionProgressAsync
+   - BroadcastJobStatusChangedAsync
+   - BroadcastJobHealthUpdatedAsync
+
+5. ServerHub.cs (240 lines)
+   Route: /hubs/servers
+   
+   Subscription Methods:
+   - SubscribeToAllServers/UnsubscribeFromAllServers
+   - SubscribeToServer/UnsubscribeFromServer
+   - SubscribeToHeartbeats/UnsubscribeFromHeartbeats
+   - SubscribeToMetrics/UnsubscribeFromMetrics
+   - SubscribeToOfflineAlerts/UnsubscribeFromOfflineAlerts
+   
+   Groups:
+   - servers:all, servers:heartbeats, servers:metrics, servers:offline
+   - servers:server:{name}
+   
+   IServerBroadcaster/ServerBroadcaster:
+   - BroadcastServerStatusChangedAsync
+   - BroadcastServerHeartbeatAsync
+   - BroadcastServerMetricsAsync
+
+6. AlertHub.cs (317 lines)
+   Route: /hubs/alerts
+   
+   Subscription Methods:
+   - SubscribeToAllAlerts/UnsubscribeFromAllAlerts
+   - SubscribeToCriticalAlerts/UnsubscribeFromCriticalAlerts
+   - SubscribeToHighPriorityAlerts/UnsubscribeFromHighPriorityAlerts
+   - SubscribeToJobAlerts/UnsubscribeFromJobAlerts
+   - SubscribeToServerAlerts/UnsubscribeFromServerAlerts
+   - SubscribeToAlertType/UnsubscribeFromAlertType
+   - SubscribeToSummary/UnsubscribeFromSummary
+   
+   Groups:
+   - alerts:all, alerts:critical, alerts:high, alerts:summary
+   - alerts:job:{id}, alerts:server:{name}, alerts:type:{type}
+   
+   IAlertBroadcaster/AlertBroadcaster:
+   - BroadcastAlertTriggeredAsync
+   - BroadcastAlertAcknowledgedAsync
+   - BroadcastAlertResolvedAsync
+   - BroadcastAlertSummaryAsync
+
+7. DashboardHub.cs (177 lines)
+   Route: /hubs/dashboard
+   
+   Subscription Methods:
+   - SubscribeToDashboard/UnsubscribeFromDashboard
+   - SubscribeToNotifications/UnsubscribeFromNotifications
+   - GetConnectionStats (returns connection statistics)
+   
+   Groups:
+   - dashboard:main, dashboard:notifications
+   
+   IDashboardBroadcaster/DashboardBroadcaster:
+   - BroadcastDashboardUpdateAsync
+   - BroadcastSystemNotificationAsync
+   - BroadcastToUserAsync (targeted notifications)
+
+8. RealTimeService.cs (453 lines)
+   IRealTimeService - Unified interface for application layer:
+   
+   Log Events:
+   - BroadcastLogAsync (individual log)
+   - BroadcastLogBatchAsync (batch of logs)
+   
+   Job Events:
+   - BroadcastExecutionStartedAsync
+   - BroadcastExecutionCompletedAsync
+   - BroadcastJobHealthUpdatedAsync
+   
+   Server Events:
+   - BroadcastServerStatusChangedAsync
+   - BroadcastServerHeartbeatAsync
+   
+   Alert Events:
+   - BroadcastAlertTriggeredAsync
+   - BroadcastAlertAcknowledgedAsync
+   - BroadcastAlertResolvedAsync
+   
+   Dashboard Events:
+   - BroadcastDashboardUpdateAsync
+   - BroadcastSystemNotificationAsync
+   - BroadcastToUserAsync
+
+9. SignalRExtensions.cs (183 lines)
+   Service Extensions:
+   - AddSignalRHubs: Registers all SignalR services
+   - MapSignalRHubs: Maps all hub endpoints
+   - AddRedisBackplane: Redis scaling (commented, requires package)
+   
+   Hub Configuration:
+   - MaximumReceiveMessageSize: 1 MB
+   - HandshakeTimeout: 15 seconds
+   - KeepAliveInterval: 15 seconds
+   - ClientTimeoutInterval: 30 seconds
+   - JSON serialization with camelCase
+   
+   Additional Classes:
+   - HubLoggingFilter: Logging for hub invocations
+   - ClaimsUserIdProvider: User ID from JWT claims
+
+10. signalr-client.ts (394 lines)
+    TypeScript client interface for frontend integration:
+    
+    Enums:
+    - LogLevel, JobStatus, ServerStatus
+    - AlertType, AlertSeverity
+    
+    Notification Interfaces:
+    - All notification DTOs mirrored from server
+    
+    Hub Client Interfaces:
+    - LogHubClient, JobHubClient, ServerHubClient
+    - AlertHubClient, DashboardHubClient
+    
+    Hub URLs:
+    - /hubs/logs, /hubs/jobs, /hubs/servers
+    - /hubs/alerts, /hubs/dashboard
+    
+    Usage Example:
+    - Connection setup with @microsoft/signalr
+    - Event subscription
+    - Method invocation
+
+PROGRAM.CS UPDATES:
+- Added SignalR using statement
+- Added SignalRHubs service registration
+- Added ClaimsUserIdProvider registration
+- Added JWT token extraction from query string (for WebSocket)
+- Added MapSignalRHubs() endpoint mapping
+
+KEY FEATURES:
+
+1. Group-Based Broadcasting
+   - Clients subscribe to specific groups
+   - Server broadcasts to relevant groups
+   - Efficient message delivery
+
+2. Multi-Transport Support
+   - WebSockets (primary)
+   - Server-Sent Events (fallback)
+
+3. Authentication
+   - JWT token in query string for WebSocket
+   - Claims-based user identification
+   - Authorize attribute on all hubs
+
+4. Connection Management
+   - Track connections per user
+   - Track connections per hub
+   - Connection statistics
+
+5. Unified Real-Time Service
+   - Single interface for application layer
+   - Abstracts SignalR details
+   - Easy integration with services
+
+6. TypeScript Client
+   - Full type definitions
+   - Ready for React/Angular/Vue integration
+   - Usage examples included
+
+HUB ENDPOINTS:
+- /hubs/logs      - Log streaming
+- /hubs/jobs      - Job execution updates
+- /hubs/servers   - Server status updates
+- /hubs/alerts    - Alert notifications
+- /hubs/dashboard - Dashboard updates
+
+CLIENT CONNECTION:
+```typescript
+const connection = new signalR.HubConnectionBuilder()
+    .withUrl(`${API_URL}/hubs/logs`, {
+        accessTokenFactory: () => token
+    })
+    .withAutomaticReconnect()
+    .build();
+
+connection.on("ReceiveLog", (log) => console.log(log));
+await connection.start();
+await connection.invoke("SubscribeToServer", "PROD-01");
+```
+
+NEXT STEPS:
+Step 17: Background Services
+- Dashboard update scheduler
+- Server health check scheduler
+- Execution timeout monitor
+- Alert evaluation engine
+- Log statistics aggregator
+
+
+================================================================================
+STEP 17: BACKGROUND SERVICES
+Completed: 2025-11-26
+================================================================================
+
+Files Created: 9 C# files
+Total Lines: ~1,900 lines
+Location: /mnt/user-data/outputs/fms-log-nexus/src/FMSLogNexus.Api/BackgroundServices/
+
+BACKGROUND SERVICE FILES:
+
+1. BaseBackgroundService.cs (144 lines)
+   Abstract Base Class:
+   - Implements BackgroundService pattern
+   - Abstract Interval property for service timing
+   - RunOnStartup and InitialDelay configuration
+   - ExecuteTaskAsync abstract method for task implementation
+   - CreateScope() and GetService<T>() helpers
+   - Consistent logging for start/stop/error
+   
+   BackgroundServiceOptions:
+   - DashboardUpdateIntervalSeconds (default: 30)
+   - ServerHealthCheckIntervalSeconds (default: 60)
+   - ExecutionTimeoutCheckIntervalSeconds (default: 30)
+   - AlertEvaluationIntervalSeconds (default: 15)
+   - LogStatisticsIntervalSeconds (default: 60)
+   - MaintenanceIntervalHours (default: 24)
+   - ServerTimeoutThresholdSeconds (default: 300)
+   - Enabled flag (default: true)
+
+2. DashboardUpdateService.cs (146 lines)
+   Purpose: Broadcasts dashboard statistics to connected clients
+   Interval: 30 seconds (configurable)
+   Initial Delay: 5 seconds
+   Runs on Startup: Yes
+   
+   Features:
+   - Builds DashboardNotification with aggregated stats
+   - Log statistics (24h totals, error rates)
+   - Job statistics (total, active, running, failed, healthy)
+   - Server statistics (online, offline, maintenance)
+   - Alert statistics (active, new, critical)
+   - Broadcasts via IRealTimeService
+
+3. ServerHealthCheckService.cs (170 lines)
+   Purpose: Monitors server heartbeats and marks offline servers
+   Interval: 60 seconds (configurable)
+   Initial Delay: 30 seconds
+   
+   Features:
+   - Detects unresponsive servers (exceeded timeout threshold)
+   - Updates server status to Offline
+   - Broadcasts status change via SignalR
+   - Triggers ServerOffline alerts
+   - Respects maintenance mode (skips servers in maintenance)
+
+4. ExecutionTimeoutService.cs (194 lines)
+   Purpose: Monitors running executions and times out stuck jobs
+   Interval: 30 seconds (configurable)
+   Initial Delay: 15 seconds
+   
+   Features:
+   - Gets overdue executions (exceeded job timeout)
+   - Marks execution as Timeout status
+   - Updates job statistics
+   - Broadcasts completion via SignalR
+   - Triggers JobTimeout alerts
+   - Includes duration and error message
+
+5. AlertEvaluationService.cs (395 lines)
+   Purpose: Evaluates alert rules and triggers alerts
+   Interval: 15 seconds (configurable)
+   Initial Delay: 20 seconds
+   
+   Alert Types Evaluated:
+   - ErrorThreshold: Checks error count against threshold in time window
+   - ConsecutiveFailures: Checks job failure streak
+   - JobFailure: Catches recent failures that might have been missed
+   - Custom: Placeholder for custom evaluation logic
+   
+   Note: JobTimeout and ServerOffline handled by dedicated services
+   
+   Features:
+   - Evaluates all active alerts
+   - Per-alert configuration support (threshold, windowMinutes, etc.)
+   - Broadcasts triggered alerts via SignalR
+   - Updates alert summary
+   - Type-safe config value extraction
+
+6. LogStatisticsService.cs (243 lines)
+   Purpose: Aggregates and broadcasts log statistics
+   Interval: 60 seconds (configurable)
+   Initial Delay: 25 seconds
+   
+   Features:
+   - Overall statistics (last hour)
+   - Per-server statistics for active servers
+   - Per-job statistics for critical jobs
+   - Error rate calculations
+   - Broadcasts via system notifications
+
+7. MaintenanceService.cs (274 lines)
+   Purpose: Performs periodic cleanup tasks
+   Check Interval: 30 minutes
+   Execution Interval: 24 hours (configurable)
+   Initial Delay: 5 minutes
+   
+   Cleanup Tasks:
+   - Old logs (default: 90 days retention)
+   - Old executions (default: 90 days, keep min 100 per job)
+   - Resolved alerts (default: 30 days)
+   - Audit logs (default: 365 days)
+   - Expired/revoked tokens
+   
+   Features:
+   - Reads retention settings from configuration service
+   - Broadcasts maintenance start/complete notifications
+   - Reports cleanup statistics
+   - Error handling with notifications
+
+8. JobHealthMonitorService.cs (176 lines)
+   Purpose: Monitors job health scores and broadcasts changes
+   Interval: 45 seconds
+   Initial Delay: 35 seconds
+   
+   Features:
+   - Tracks last known health scores
+   - Detects significant changes (10+ points)
+   - Detects threshold crossings (healthy/warning/critical)
+   - Broadcasts health updates via SignalR
+   - System notifications for critical changes
+   - System notifications for recoveries
+   - Cleans up tracking for inactive jobs
+
+9. BackgroundServiceExtensions.cs (158 lines)
+   Extension Methods:
+   - AddBackgroundServices(IConfiguration): From config section
+   - AddBackgroundServices(Action<Options>): With custom config
+   
+   Additional Classes:
+   - BackgroundServiceOptionsValidator: Validates configuration
+   - BackgroundServicesHealthCheck: Health check for monitoring
+
+CONFIGURATION UPDATES:
+
+appsettings.json (Production):
+- BackgroundServices.Enabled: true
+- DashboardUpdateIntervalSeconds: 30
+- ServerHealthCheckIntervalSeconds: 60
+- ExecutionTimeoutCheckIntervalSeconds: 30
+- AlertEvaluationIntervalSeconds: 15
+- LogStatisticsIntervalSeconds: 60
+- MaintenanceIntervalHours: 24
+- ServerTimeoutThresholdSeconds: 300
+
+appsettings.Development.json:
+- Faster intervals for development/testing
+- DashboardUpdateIntervalSeconds: 10
+- ServerHealthCheckIntervalSeconds: 30
+- ExecutionTimeoutCheckIntervalSeconds: 15
+- AlertEvaluationIntervalSeconds: 10
+- LogStatisticsIntervalSeconds: 30
+- MaintenanceIntervalHours: 1
+- ServerTimeoutThresholdSeconds: 120
+
+PROGRAM.CS UPDATES:
+- Added BackgroundServices using statement
+- Added AddBackgroundServices(configuration) call
+
+KEY FEATURES:
+
+1. Staggered Startup
+   - Each service has different initial delay
+   - Prevents all services hitting DB at once
+   - Smooth system startup
+
+2. Configurable Intervals
+   - All intervals via appsettings.json
+   - Different settings for dev/prod
+   - Options validation on startup
+
+3. Error Resilience
+   - Each task wrapped in try-catch
+   - Errors logged but don't stop service
+   - Continues to next interval on error
+
+4. Real-Time Integration
+   - All services use IRealTimeService
+   - Broadcasts updates via SignalR
+   - System notifications for important events
+
+5. Dependency Injection
+   - Each task creates new scope
+   - Proper service lifetime management
+   - No singleton service issues
+
+SERVICE SCHEDULE SUMMARY:
+
+| Service                  | Interval | Initial Delay | Purpose                    |
+|--------------------------|----------|---------------|----------------------------|
+| DashboardUpdateService   | 30s      | 5s            | Dashboard stats broadcast  |
+| AlertEvaluationService   | 15s      | 20s           | Alert rule evaluation      |
+| ExecutionTimeoutService  | 30s      | 15s           | Timeout stuck executions   |
+| ServerHealthCheckService | 60s      | 30s           | Mark offline servers       |
+| JobHealthMonitorService  | 45s      | 35s           | Job health monitoring      |
+| LogStatisticsService     | 60s      | 25s           | Log stats aggregation      |
+| MaintenanceService       | 24h      | 5m            | Cleanup and maintenance    |
+
+NEXT STEPS:
+Step 18: Unit Tests (optional)
+Step 19: Integration Tests (optional)
+Step 20: Docker Configuration
+Step 21: Documentation
+
+
+================================================================================
+STEP 18: UNIT TESTS
+Completed: 2025-11-26
+================================================================================
+
+Files Created: 14 files
+Total Lines: ~3,600 lines
+Location: /mnt/user-data/outputs/fms-log-nexus/src/FMSLogNexus.Tests/
+
+TEST PROJECT SETUP:
+
+Project File: FMSLogNexus.Tests.csproj (41 lines)
+Target Framework: net8.0
+Test Framework: xUnit 2.6.2
+Mocking: Moq 4.20.70
+Assertions: FluentAssertions 6.12.0
+Fake Data: Bogus 35.0.1
+In-Memory Database: Microsoft.EntityFrameworkCore.InMemory 8.0.0
+
+FIXTURES (482 lines):
+
+1. TestDataFactory.cs (203 lines)
+   Entity Fakers:
+   - LogEntryFaker: Generates random log entries
+   - JobFaker: Generates random job configurations
+   - ExecutionFaker: Generates job executions
+   - ServerFaker: Generates server records
+   - AlertRuleFaker: Generates alert rules
+   - UserFaker: Generates user accounts
+   
+   DTO Fakers:
+   - CreateLogRequestFaker
+   - CreateJobRequestFaker
+   - StartExecutionRequestFaker
+   - CreateServerRequestFaker
+   - CreateAlertRequestFaker
+   - CreateUserRequestFaker
+   
+   Helper Methods:
+   - CreateLogEntry, CreateLogEntries
+   - CreateJob, CreateJobs
+   - CreateExecution, CreateServer
+   - CreateAlertRule, CreateUser
+   - RandomJobId, RandomServerName, RandomCorrelationId
+
+2. MockHelpers.cs (192 lines)
+   Repository Mocks:
+   - CreateMockLogRepository, CreateMockJobRepository
+   - CreateMockExecutionRepository, CreateMockServerRepository
+   - CreateMockAlertRepository, CreateMockAlertInstanceRepository
+   - CreateMockUserRepository, CreateMockRefreshTokenRepository
+   - CreateMockApiKeyRepository, CreateMockAuditLogRepository
+   - CreateMockConfigurationRepository
+   
+   Service Mocks:
+   - CreateMockLogService, CreateMockJobService
+   - CreateMockExecutionService, CreateMockServerService
+   - CreateMockAlertService, CreateMockUserService
+   - CreateMockAuthService, CreateMockAuditService
+   - CreateMockConfigurationService, CreateMockMaintenanceService
+   
+   Extension Methods:
+   - SetupSuccess, SetupFailure
+   - VerifyCalledOnce, VerifyNeverCalled
+
+3. TestDbContextFactory.cs (87 lines)
+   - TestDbContextFactory: Creates in-memory DbContext
+   - SeedAsync: Seeds database with test data
+   - DatabaseTestBase: Base class for DB tests
+
+SERVICE TESTS (2,048 lines):
+
+1. LogServiceTests.cs (276 lines)
+   Tests:
+   - CreateAsync_WithValidRequest_ShouldCreateLog
+   - CreateAsync_WithNullTimestamp_ShouldUseUtcNow
+   - CreateAsync_WithNullRequest_ShouldThrowArgumentNullException
+   - CreateBatchAsync_WithValidRequests_ShouldCreateAllLogs
+   - CreateBatchAsync_WithEmptyList_ShouldReturnZeroCounts
+   - GetByIdAsync_WithExistingId_ShouldReturnLog
+   - GetByIdAsync_WithNonExistingId_ShouldReturnNull
+   - SearchAsync_WithDefaultRequest_ShouldReturnPagedResults
+   - SearchAsync_WithLevelFilter_ShouldFilterByLevel
+   - GetStatisticsAsync_ShouldReturnStatistics
+   - GetByCorrelationIdAsync_WithExistingCorrelationId_ShouldReturnLogs
+
+2. JobServiceTests.cs (390 lines)
+   Tests:
+   - CreateAsync_WithValidRequest_ShouldCreateJob
+   - CreateAsync_WithExistingJobId_ShouldThrowInvalidOperationException
+   - CreateAsync_WithNullRequest_ShouldThrowArgumentNullException
+   - GetByIdAsync_WithExistingJob_ShouldReturnJob
+   - GetByIdAsync_WithNonExistingJob_ShouldReturnNull
+   - UpdateAsync_WithExistingJob_ShouldUpdateJob
+   - UpdateAsync_WithNonExistingJob_ShouldReturnNull
+   - ActivateAsync_WithExistingJob_ShouldActivateJob
+   - DeactivateAsync_WithExistingJob_ShouldDeactivateJob
+   - GetJobHealthAsync_WithHealthyJob_ShouldReturnHighScore
+   - GetJobHealthAsync_WithFailingJob_ShouldReturnLowScore
+   - RegisterJobAsync_WithNewJob_ShouldCreateJob
+   - RegisterJobAsync_WithExistingJob_ShouldUpdateJob
+   - SearchAsync_WithDefaultRequest_ShouldReturnPagedResults
+
+3. ExecutionServiceTests.cs (349 lines)
+   Tests:
+   - StartAsync_WithValidRequest_ShouldCreateExecution
+   - StartAsync_WithNonExistingJob_ShouldThrowKeyNotFoundException
+   - StartAsync_WithAlreadyRunningJob_ShouldThrowInvalidOperationException
+   - CompleteAsync_WithSuccessStatus_ShouldCompleteExecution
+   - CompleteAsync_WithFailedStatus_ShouldUpdateFailureCount
+   - CompleteAsync_WithNonRunningExecution_ShouldThrowInvalidOperationException
+   - CancelAsync_WithRunningExecution_ShouldCancelExecution
+   - GetRunningAsync_ShouldReturnRunningExecutions
+   - GetConsecutiveFailureCountAsync_ShouldReturnCount
+   - GetStatisticsAsync_ShouldReturnStatistics
+
+4. AuthServiceTests.cs (465 lines)
+   Tests:
+   - LoginAsync_WithValidCredentials_ShouldReturnTokens
+   - LoginAsync_WithInvalidUsername_ShouldThrowUnauthorizedAccessException
+   - LoginAsync_WithInvalidPassword_ShouldThrowUnauthorizedAccessException
+   - LoginAsync_WithLockedAccount_ShouldThrowInvalidOperationException
+   - LoginAsync_WithInactiveAccount_ShouldThrowInvalidOperationException
+   - RefreshTokenAsync_WithValidToken_ShouldReturnNewTokens
+   - RefreshTokenAsync_WithExpiredToken_ShouldThrowUnauthorizedAccessException
+   - RefreshTokenAsync_WithRevokedToken_ShouldThrowUnauthorizedAccessException
+   - ValidateTokenAsync_WithValidToken_ShouldReturnValidResult
+   - ValidateTokenAsync_WithInvalidToken_ShouldReturnInvalidResult
+   - ChangePasswordAsync_WithValidCurrentPassword_ShouldChangePassword
+   - ChangePasswordAsync_WithInvalidCurrentPassword_ShouldThrowUnauthorizedAccessException
+   - AuthenticateApiKeyAsync_WithValidKey_ShouldReturnUser
+   - AuthenticateApiKeyAsync_WithInvalidKey_ShouldReturnNull
+
+5. ServerServiceTests.cs (237 lines)
+   Tests:
+   - CreateAsync_WithValidRequest_ShouldCreateServer
+   - CreateAsync_WithExistingServerName_ShouldThrowInvalidOperationException
+   - ProcessHeartbeatAsync_WithNewServer_ShouldCreateServer
+   - ProcessHeartbeatAsync_WithExistingServer_ShouldUpdateServer
+   - GetUnresponsiveServersAsync_ShouldReturnServersExceedingTimeout
+   - SetMaintenanceModeAsync_WithExistingServer_ShouldSetMaintenance
+   - GetStatusSummaryAsync_ShouldReturnSummary
+
+6. AlertServiceTests.cs (331 lines)
+   Tests:
+   - CreateAsync_WithValidRequest_ShouldCreateAlert
+   - TriggerAlertAsync_WithValidAlert_ShouldCreateInstance
+   - TriggerAlertAsync_WithinCooldown_ShouldReturnNull
+   - TriggerAlertAsync_WithInactiveAlert_ShouldReturnNull
+   - AcknowledgeInstanceAsync_WithNewInstance_ShouldAcknowledge
+   - AcknowledgeInstanceAsync_WithAlreadyResolved_ShouldReturnFalse
+   - ResolveInstanceAsync_WithAcknowledgedInstance_ShouldResolve
+   - BulkAcknowledgeAsync_ShouldAcknowledgeMultipleInstances
+   - GetInstanceSummaryAsync_ShouldReturnSummary
+   - GetByTypeAsync_ShouldReturnAlertsByType
+
+CONTROLLER TESTS (691 lines):
+
+1. LogsControllerTests.cs (319 lines)
+   Tests:
+   - CreateLog_WithValidRequest_ShouldReturnCreatedResult
+   - CreateLog_WithInvalidModel_ShouldReturnBadRequest
+   - CreateBatch_WithValidRequests_ShouldReturnOkResult
+   - CreateBatch_WithTooManyRequests_ShouldReturnBadRequest
+   - GetLog_WithExistingId_ShouldReturnOkResult
+   - GetLog_WithNonExistingId_ShouldReturnNotFound
+   - SearchLogs_WithDefaultParameters_ShouldReturnPagedResults
+   - GetStatistics_ShouldReturnStatistics
+   - GetByCorrelationId_WithExistingCorrelationId_ShouldReturnLogs
+   - GetRecentErrors_ShouldReturnErrors
+   - ExportLogs_ShouldReturnCsvFile
+
+2. AuthControllerTests.cs (372 lines)
+   Tests:
+   - Login_WithValidCredentials_ShouldReturnOkWithTokens
+   - Login_WithInvalidCredentials_ShouldReturnUnauthorized
+   - Login_WithLockedAccount_ShouldReturnLocked
+   - RefreshToken_WithValidToken_ShouldReturnNewTokens
+   - RefreshToken_WithExpiredToken_ShouldReturnUnauthorized
+   - Logout_WithValidToken_ShouldReturnNoContent
+   - LogoutAllSessions_ShouldRevokeAllTokens
+   - ChangePassword_WithValidCurrentPassword_ShouldReturnNoContent
+   - ChangePassword_WithInvalidCurrentPassword_ShouldReturnUnauthorized
+   - GetCurrentUser_WithAuthenticatedUser_ShouldReturnUserInfo
+   - ValidateToken_WithValidToken_ShouldReturnValidResult
+   - ValidateToken_WithInvalidToken_ShouldReturnInvalidResult
+
+ENTITY TESTS (337 lines):
+
+1. EntityTests.cs (337 lines)
+   LogEntry Tests:
+   - LogEntry_ShouldHaveDefaultValues
+   - LogEntry_ShouldSetPropertiesCorrectly
+   
+   Job Tests:
+   - Job_ShouldHaveDefaultValues
+   - Job_GetTags_ShouldReturnParsedTags
+   - Job_SetTags_ShouldJoinTags
+   
+   JobExecution Tests:
+   - JobExecution_ShouldCalculateDuration
+   - JobExecution_DurationShouldBeNullWhenNotCompleted
+   
+   AlertRule Tests:
+   - AlertRule_GetConfiguration_ShouldReturnParsedJson
+   - AlertRule_SetConfiguration_ShouldSerializeToJson
+   - AlertRule_IsInCooldown_ShouldReturnTrueWhenWithinCooldown
+   - AlertRule_IsInCooldown_ShouldReturnFalseWhenCooldownExpired
+   
+   User Tests:
+   - User_ShouldHaveDefaultValues
+   - User_IsLockoutExpired_ShouldReturnTrueWhenExpired
+   - User_IsLockoutExpired_ShouldReturnFalseWhenNotExpired
+   - User_ShouldHandlePreferences
+   
+   Server Tests:
+   - Server_ShouldHaveDefaultValues
+   - Server_IsUnresponsive_ShouldReturnTrueWhenExceedsThreshold
+   - Server_IsUnresponsive_ShouldReturnFalseWhenRecent
+
+SOLUTION FILE UPDATED:
+- Added FMSLogNexus.Tests project
+
+TEST EXECUTION:
+Run all tests: dotnet test
+Run with coverage: dotnet test --collect:"XPlat Code Coverage"
+Run specific category: dotnet test --filter "Category=Unit"
+
+TOTAL TEST COUNT: 70+ unit tests
+
+NEXT STEPS:
+Step 19: Integration Tests (optional)
+Step 20: Docker Configuration
+Step 21: Documentation
+

@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+  <metadata>
+    <id>FMSLogNexus.Client</id>
+    <version>1.0.0</version>
+    <authors>FMS Log Nexus Team</authors>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
+    <description>Client SDK for integrating with FMS Log Nexus centralized logging system</description>
+    <tags>logging monitoring fms client sdk</tags>
+    <repository type="git" url="https://github.com/your-org/fms-log-nexus" />
+    <dependencies>
+      <group targetFramework="net8.0">
+        <dependency id="Microsoft.AspNetCore.SignalR.Client" version="8.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Hosting.Abstractions" version="8.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Http" version="8.0.0" exclude="Build,Analyzers" />
+        <dependency id="Microsoft.Extensions.Logging.Abstractions" version="8.0.0" exclude="Build,Analyzers" />
+        <dependency id="System.Text.Json" version="8.0.5" exclude="Build,Analyzers" />
+      </group>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Client\bin\Release\net8.0\FMSLogNexus.Client.dll" target="lib\net8.0\FMSLogNexus.Client.dll" />
+    <file src="D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Client\bin\Release\net8.0\FMSLogNexus.Client.xml" target="lib\net8.0\FMSLogNexus.Client.xml" />
+  </files>
+</package>

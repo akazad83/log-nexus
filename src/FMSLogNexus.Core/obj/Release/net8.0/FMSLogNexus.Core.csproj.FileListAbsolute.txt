@@ -1,0 +1,11 @@
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Core\bin\Release\net8.0\FMSLogNexus.Core.deps.json
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Core\bin\Release\net8.0\FMSLogNexus.Core.dll
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Core\bin\Release\net8.0\FMSLogNexus.Core.pdb
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Core\obj\Release\net8.0\FMSLogNexus.Core.GeneratedMSBuildEditorConfig.editorconfig
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Core\obj\Release\net8.0\FMSLogNexus.Core.AssemblyInfoInputs.cache
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Core\obj\Release\net8.0\FMSLogNexus.Core.AssemblyInfo.cs
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Core\obj\Release\net8.0\FMSLogNexus.Core.csproj.CoreCompileInputs.cache
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Core\obj\Release\net8.0\FMSLogNexus.Core.dll
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Core\obj\Release\net8.0\refint\FMSLogNexus.Core.dll
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Core\obj\Release\net8.0\FMSLogNexus.Core.pdb
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Core\obj\Release\net8.0\ref\FMSLogNexus.Core.dll

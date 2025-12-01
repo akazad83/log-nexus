@@ -1,0 +1,17 @@
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Infrastructure\bin\Release\net8.0\FMSLogNexus.Infrastructure.deps.json
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Infrastructure\bin\Release\net8.0\FMSLogNexus.Infrastructure.runtimeconfig.json
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Infrastructure\bin\Release\net8.0\FMSLogNexus.Infrastructure.dll
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Infrastructure\bin\Release\net8.0\FMSLogNexus.Infrastructure.pdb
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Infrastructure\bin\Release\net8.0\FMSLogNexus.Core.dll
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Infrastructure\bin\Release\net8.0\FMSLogNexus.Core.pdb
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Infrastructure\obj\Release\net8.0\FMSLogNexus.Infrastructure.csproj.AssemblyReference.cache
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Infrastructure\obj\Release\net8.0\FMSLogNexus.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Infrastructure\obj\Release\net8.0\FMSLogNexus.Infrastructure.AssemblyInfoInputs.cache
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Infrastructure\obj\Release\net8.0\FMSLogNexus.Infrastructure.AssemblyInfo.cs
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Infrastructure\obj\Release\net8.0\FMSLogNexus.Infrastructure.csproj.CoreCompileInputs.cache
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Infrastructure\obj\Release\net8.0\FMSLogNe.F58028E3.Up2Date
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Infrastructure\obj\Release\net8.0\FMSLogNexus.Infrastructure.dll
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Infrastructure\obj\Release\net8.0\refint\FMSLogNexus.Infrastructure.dll
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Infrastructure\obj\Release\net8.0\FMSLogNexus.Infrastructure.pdb
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Infrastructure\obj\Release\net8.0\FMSLogNexus.Infrastructure.genruntimeconfig.cache
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Infrastructure\obj\Release\net8.0\ref\FMSLogNexus.Infrastructure.dll

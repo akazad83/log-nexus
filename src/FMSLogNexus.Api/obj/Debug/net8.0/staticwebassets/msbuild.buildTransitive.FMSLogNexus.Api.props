@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\buildMultiTargeting\FMSLogNexus.Api.props" />
+</Project>

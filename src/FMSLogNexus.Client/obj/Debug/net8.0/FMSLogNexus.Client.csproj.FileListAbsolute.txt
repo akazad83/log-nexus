@@ -1,0 +1,14 @@
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Client\bin\Debug\net8.0\FMSLogNexus.Client.deps.json
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Client\bin\Debug\net8.0\FMSLogNexus.Client.dll
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Client\bin\Debug\net8.0\FMSLogNexus.Client.pdb
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Client\bin\Debug\net8.0\FMSLogNexus.Client.xml
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Client\obj\Debug\net8.0\FMSLogNexus.Client.csproj.AssemblyReference.cache
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Client\obj\Debug\net8.0\FMSLogNexus.Client.GeneratedMSBuildEditorConfig.editorconfig
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Client\obj\Debug\net8.0\FMSLogNexus.Client.AssemblyInfoInputs.cache
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Client\obj\Debug\net8.0\FMSLogNexus.Client.AssemblyInfo.cs
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Client\obj\Debug\net8.0\FMSLogNexus.Client.csproj.CoreCompileInputs.cache
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Client\obj\Debug\net8.0\FMSLogNexus.Client.dll
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Client\obj\Debug\net8.0\refint\FMSLogNexus.Client.dll
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Client\obj\Debug\net8.0\FMSLogNexus.Client.xml
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Client\obj\Debug\net8.0\FMSLogNexus.Client.pdb
+D:\103_RnD\103_02_WORK\FMSLogNexus\SOURCE\fms-log-nexus\src\FMSLogNexus.Client\obj\Debug\net8.0\ref\FMSLogNexus.Client.dll

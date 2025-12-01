@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "pO4xpJgG/wo=",
+  "success": true,
+  "projectFilePath": "D:\\103_RnD\\103_02_WORK\\FMSLogNexus\\SOURCE\\fms-log-nexus\\src\\FMSLogNexus.Core\\FMSLogNexus.Core.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\akaza\\.nuget\\packages\\system.text.json\\8.0.5\\system.text.json.8.0.5.nupkg.sha512"
+  ],
+  "logs": []
+}

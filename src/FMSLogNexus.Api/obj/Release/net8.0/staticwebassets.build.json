@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "EBBgEEGTaZM2Jcg9R2QFqMPH6u73Ekq8Lv6rUIDGJOc=",
+  "Source": "FMSLogNexus.Api",
+  "BasePath": "_content/FMSLogNexus.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

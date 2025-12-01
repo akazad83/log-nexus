@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>FMSLogNexus.Core</RootNamespace>
+    <AssemblyName>FMSLogNexus.Core</AssemblyName>
+    <Version>1.0.0</Version>
+    <Description>FMS Log Nexus Core - Domain entities, interfaces, and DTOs</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,3362 @@
+{
+  "info": {
+    "_postman_id": "fms-log-nexus-api-collection",
+    "name": "FMS Log Nexus API",
+    "description": "Complete API collection for FMS Log Nexus - a centralized logging and job monitoring platform.\n\n## Authentication\nThis API uses JWT Bearer token authentication. Use the `/auth/login` endpoint to obtain an access token, then set it in the `accessToken` variable.\n\n## Quick Start\n1. Set the `baseUrl` variable to your server URL\n2. Call `POST /auth/login` with credentials\n3. The access token is automatically saved to `accessToken` variable\n4. All other endpoints will use this token automatically\n\n## API Version\n- Current Version: v1\n- Base Path: `/api/v1`",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Pre-request script for all requests",
+          "// Automatically refresh token if expired",
+          "const tokenExpiry = pm.environment.get('tokenExpiry');",
+          "const refreshToken = pm.environment.get('refreshToken');",
+          "",
+          "if (tokenExpiry && refreshToken && Date.now() > parseInt(tokenExpiry)) {",
+          "    console.log('Token expired, refreshing...');",
+          "    pm.sendRequest({",
+          "        url: pm.environment.get('baseUrl') + '/api/v1/auth/refresh',",
+          "        method: 'POST',",
+          "        header: { 'Content-Type': 'application/json' },",
+          "        body: {",
+          "            mode: 'raw',",
+          "            raw: JSON.stringify({ refreshToken: refreshToken })",
+          "        }",
+          "    }, function (err, res) {",
+          "        if (!err && res.code === 200) {",
+          "            const data = res.json();",
+          "            pm.environment.set('accessToken', data.accessToken);",
+          "            pm.environment.set('refreshToken', data.refreshToken);",
+          "            pm.environment.set('tokenExpiry', Date.now() + (data.expiresIn * 1000));",
+          "        }",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "apiVersion",
+      "value": "v1",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tokenExpiry",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "jobId",
+      "value": "SAMPLE-JOB-001",
+      "type": "string"
+    },
+    {
+      "key": "executionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "serverName",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "alertId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "alertInstanceId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "logId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "apiKeyId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01. Authentication",
+      "description": "Authentication and authorization endpoints for user login, token management, and password operations.",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login successful', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', data.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', data.refreshToken);",
+                  "    pm.collectionVariables.set('tokenExpiry', Date.now() + (data.expiresIn * 1000));",
+                  "    pm.collectionVariables.set('userId', data.user.id);",
+                  "    console.log('Token saved successfully');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Admin@123\",\n  \"rememberMe\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "auth", "login"]
+            },
+            "description": "Authenticate a user and obtain JWT tokens.\n\n**Request Body:**\n- `username` (required): 3-100 characters\n- `password` (required): minimum 6 characters\n- `rememberMe` (optional): extends token lifetime\n\n**Response:**\n- `accessToken`: JWT token for API access\n- `refreshToken`: Token for refreshing access token\n- `expiresIn`: Token expiration in seconds\n- `user`: User information object"
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Token refreshed', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('accessToken', data.accessToken);",
+                  "    pm.collectionVariables.set('refreshToken', data.refreshToken);",
+                  "    pm.collectionVariables.set('tokenExpiry', Date.now() + (data.expiresIn * 1000));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "auth", "refresh"]
+            },
+            "description": "Refresh an expired access token using a valid refresh token.\n\n**Request Body:**\n- `refreshToken` (required): Valid refresh token from login\n\n**Response:**\n- `accessToken`: New JWT token\n- `refreshToken`: New refresh token\n- `expiresIn`: Token expiration in seconds"
+          }
+        },
+        {
+          "name": "Get Current User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('User retrieved', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('userId', data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "auth", "me"]
+            },
+            "description": "Get the currently authenticated user's profile.\n\n**Response:**\n- `id`: User GUID\n- `username`: Username\n- `email`: Email address\n- `displayName`: Display name\n- `role`: User role (Admin, Operator, Viewer)\n- `isActive`: Account status\n- `lastLoginAt`: Last login timestamp\n- `preferences`: User preferences object"
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"Admin@123\",\n  \"newPassword\": \"NewPassword@123\",\n  \"confirmPassword\": \"NewPassword@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/auth/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "auth", "change-password"]
+            },
+            "description": "Change the current user's password.\n\n**Request Body:**\n- `currentPassword` (required): Current password\n- `newPassword` (required): New password (min 8 chars)\n- `confirmPassword` (required): Must match newPassword\n\n**Response:** 204 No Content on success"
+          }
+        },
+        {
+          "name": "Validate Token",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "\"{{accessToken}}\""
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/auth/validate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "auth", "validate"]
+            },
+            "description": "Validate a JWT token and get its claims.\n\n**Request Body:** Token string\n\n**Response:** Token validation result with claims"
+          }
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Logout successful', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 204) {",
+                  "    pm.collectionVariables.set('accessToken', '');",
+                  "    pm.collectionVariables.set('refreshToken', '');",
+                  "    pm.collectionVariables.set('tokenExpiry', '');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "\"{{refreshToken}}\""
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "auth", "logout"]
+            },
+            "description": "Logout from current session and revoke the refresh token.\n\n**Request Body:** Refresh token string\n\n**Response:** 204 No Content"
+          }
+        },
+        {
+          "name": "Logout All Sessions",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/auth/logout-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "auth", "logout-all"]
+            },
+            "description": "Logout from all active sessions and revoke all refresh tokens.\n\n**Response:** 204 No Content"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Users",
+      "description": "User management endpoints including CRUD operations, API keys, and preferences.",
+      "item": [
+        {
+          "name": "User CRUD",
+          "item": [
+            {
+              "name": "Create User",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('User created', function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "if (pm.response.code === 201) {",
+                      "    const data = pm.response.json();",
+                      "    pm.collectionVariables.set('createdUserId', data.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"testuser@example.com\",\n  \"displayName\": \"Test User\",\n  \"password\": \"TestUser@123\",\n  \"role\": \"Operator\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/users",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "users"]
+                },
+                "description": "Create a new user (Admin only).\n\n**Request Body:**\n- `username` (required): 3-100 chars, alphanumeric + ._-\n- `email` (required): Valid email address\n- `displayName` (optional): Max 200 chars\n- `password` (required): Min 8 chars\n- `role` (required): Admin, Operator, or Viewer\n\n**Response:** 201 Created with UserResponse"
+              }
+            },
+            {
+              "name": "Get User by ID",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{userId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "users", "{{userId}}"]
+                },
+                "description": "Get a user by their ID.\n\n**Path Parameters:**\n- `userId`: User GUID\n\n**Note:** Non-admins can only view their own profile.\n\n**Response:** UserResponse object"
+              }
+            },
+            {
+              "name": "Update User",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"updated@example.com\",\n  \"displayName\": \"Updated Display Name\",\n  \"role\": \"Operator\",\n  \"isActive\": true\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{userId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "users", "{{userId}}"]
+                },
+                "description": "Update an existing user.\n\n**Path Parameters:**\n- `userId`: User GUID\n\n**Request Body:**\n- `email` (optional): New email address\n- `displayName` (optional): New display name\n- `role` (optional): Admin only - change user role\n- `isActive` (optional): Account status\n\n**Response:** Updated UserResponse"
+              }
+            },
+            {
+              "name": "Delete User",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{createdUserId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "users", "{{createdUserId}}"]
+                },
+                "description": "Delete a user (Admin only).\n\n**Path Parameters:**\n- `userId`: User GUID to delete\n\n**Note:** Cannot delete your own account.\n\n**Response:** 204 No Content"
+              }
+            },
+            {
+              "name": "List Users",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/users?page=1&pageSize=50",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "users"],
+                  "query": [
+                    {
+                      "key": "search",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "role",
+                      "value": "Admin",
+                      "disabled": true
+                    },
+                    {
+                      "key": "isActive",
+                      "value": "true",
+                      "disabled": true
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "50"
+                    }
+                  ]
+                },
+                "description": "List all users with filtering and pagination (Admin only).\n\n**Query Parameters:**\n- `search` (optional): Search by username, email, or display name\n- `role` (optional): Filter by role (Admin, Operator, Viewer)\n- `isActive` (optional): Filter by active status\n- `page` (optional): Page number (default: 1)\n- `pageSize` (optional): Items per page (default: 50)\n\n**Response:** PaginatedResult<UserResponse>"
+              }
+            }
+          ]
+        },
+        {
+          "name": "User Actions",
+          "item": [
+            {
+              "name": "Activate User",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{userId}}/activate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "users", "{{userId}}", "activate"]
+                },
+                "description": "Activate a deactivated user account (Admin only).\n\n**Response:** 204 No Content"
+              }
+            },
+            {
+              "name": "Deactivate User",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{userId}}/deactivate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "users", "{{userId}}", "deactivate"]
+                },
+                "description": "Deactivate a user account (Admin only).\n\n**Note:** Cannot deactivate your own account.\n\n**Response:** 204 No Content"
+              }
+            },
+            {
+              "name": "Unlock User",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{userId}}/unlock",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "users", "{{userId}}", "unlock"]
+                },
+                "description": "Unlock a locked user account (Admin only).\n\n**Response:** 204 No Content"
+              }
+            },
+            {
+              "name": "Reset User Password",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"newPassword\": \"ResetPassword@123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{userId}}/reset-password",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "users", "{{userId}}", "reset-password"]
+                },
+                "description": "Reset a user's password (Admin only).\n\n**Request Body:**\n- `newPassword` (required): New password\n\n**Response:** 204 No Content"
+              }
+            },
+            {
+              "name": "Check Username Availability",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/users/check-username?username=newuser",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "users", "check-username"],
+                  "query": [
+                    {
+                      "key": "username",
+                      "value": "newuser"
+                    },
+                    {
+                      "key": "excludeUserId",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Check if a username is available.\n\n**Query Parameters:**\n- `username` (required): Username to check\n- `excludeUserId` (optional): Exclude this user from check\n\n**Response:** { Username, IsAvailable }"
+              }
+            },
+            {
+              "name": "Check Email Availability",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/users/check-email?email=test@example.com",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "users", "check-email"],
+                  "query": [
+                    {
+                      "key": "email",
+                      "value": "test@example.com"
+                    },
+                    {
+                      "key": "excludeUserId",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Check if an email is available.\n\n**Query Parameters:**\n- `email` (required): Email to check\n- `excludeUserId` (optional): Exclude this user from check\n\n**Response:** { Email, IsAvailable }"
+              }
+            }
+          ]
+        },
+        {
+          "name": "User Preferences",
+          "item": [
+            {
+              "name": "Get User Preferences",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{userId}}/preferences",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "users", "{{userId}}", "preferences"]
+                },
+                "description": "Get a user's preferences.\n\n**Response:**\n- `theme`: \"light\" or \"dark\"\n- `timezone`: Timezone (default: UTC)\n- `refreshInterval`: Auto-refresh interval in seconds\n- `defaultPageSize`: Default pagination size\n- `defaultLogLevel`: Default log level filter\n- `emailNotifications`: Email notifications enabled"
+              }
+            },
+            {
+              "name": "Update User Preferences",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"theme\": \"dark\",\n  \"timezone\": \"UTC\",\n  \"refreshInterval\": 30,\n  \"defaultPageSize\": 25,\n  \"defaultLogLevel\": \"Warning\",\n  \"emailNotifications\": true\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{userId}}/preferences",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "users", "{{userId}}", "preferences"]
+                },
+                "description": "Update a user's preferences.\n\n**Request Body:**\n- `theme`: \"light\" or \"dark\"\n- `timezone`: Valid timezone identifier\n- `refreshInterval`: Seconds between auto-refresh\n- `defaultPageSize`: Default items per page\n- `defaultLogLevel`: Default log filter level\n- `emailNotifications`: Enable email notifications\n\n**Response:** Updated UserPreferencesResponse"
+              }
+            }
+          ]
+        },
+        {
+          "name": "API Keys",
+          "item": [
+            {
+              "name": "Create API Key",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('API Key created', function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "if (pm.response.code === 201) {",
+                      "    const data = pm.response.json();",
+                      "    pm.collectionVariables.set('apiKeyId', data.id);",
+                      "    console.log('IMPORTANT: Save this key! Full key:', data.key);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"My API Key\",\n  \"description\": \"API key for automation scripts\",\n  \"serverName\": \"my-server\",\n  \"scopes\": [\"logs:write\", \"jobs:read\"],\n  \"expirationDays\": 90\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{userId}}/api-keys",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "users", "{{userId}}", "api-keys"]
+                },
+                "description": "Create a new API key for the user.\n\n**Request Body:**\n- `name` (required): 3-100 chars\n- `description` (optional): Max 500 chars\n- `serverName` (optional): Max 100 chars\n- `scopes` (optional): List of permission scopes\n- `expirationDays` (optional): 1-365 days\n\n**Response:** ApiKeyResponse with FULL key (shown only once!)"
+              }
+            },
+            {
+              "name": "Get API Key",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{userId}}/api-keys/{{apiKeyId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "users", "{{userId}}", "api-keys", "{{apiKeyId}}"]
+                },
+                "description": "Get an API key by ID (key value is masked).\n\n**Response:** ApiKeyListItem (without full key)"
+              }
+            },
+            {
+              "name": "List API Keys",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{userId}}/api-keys?includeRevoked=false",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "users", "{{userId}}", "api-keys"],
+                  "query": [
+                    {
+                      "key": "includeRevoked",
+                      "value": "false"
+                    }
+                  ]
+                },
+                "description": "List all API keys for the user.\n\n**Query Parameters:**\n- `includeRevoked` (optional): Include revoked keys\n\n**Response:** List of ApiKeyListItem"
+              }
+            },
+            {
+              "name": "Revoke API Key",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{userId}}/api-keys/{{apiKeyId}}?reason=No longer needed",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "users", "{{userId}}", "api-keys", "{{apiKeyId}}"],
+                  "query": [
+                    {
+                      "key": "reason",
+                      "value": "No longer needed"
+                    }
+                  ]
+                },
+                "description": "Revoke an API key.\n\n**Query Parameters:**\n- `reason` (optional): Revocation reason\n\n**Response:** 204 No Content"
+              }
+            },
+            {
+              "name": "Revoke All API Keys",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/users/{{userId}}/api-keys?reason=Security rotation",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "users", "{{userId}}", "api-keys"],
+                  "query": [
+                    {
+                      "key": "reason",
+                      "value": "Security rotation"
+                    }
+                  ]
+                },
+                "description": "Revoke all API keys for the user.\n\n**Query Parameters:**\n- `reason` (optional): Revocation reason\n\n**Response:** { RevokedCount: number }"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03. Jobs",
+      "description": "Job management endpoints for registering, monitoring, and managing batch jobs.",
+      "item": [
+        {
+          "name": "Job CRUD",
+          "item": [
+            {
+              "name": "Create Job",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Job created', function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "if (pm.response.code === 201) {",
+                      "    const data = pm.response.json();",
+                      "    pm.collectionVariables.set('jobId', data.jobId);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jobId\": \"DATA-SYNC-001\",\n  \"displayName\": \"Data Synchronization Job\",\n  \"description\": \"Synchronizes data between primary and backup databases\",\n  \"category\": \"DataSync\",\n  \"priority\": \"High\",\n  \"timeoutMinutes\": 30,\n  \"expectedDurationMinutes\": 15,\n  \"cronExpression\": \"0 */6 * * *\",\n  \"tags\": [\"database\", \"sync\", \"critical\"],\n  \"metadata\": {\n    \"owner\": \"data-team\",\n    \"notification\": \"slack\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/jobs",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "jobs"]
+                },
+                "description": "Create a new job definition.\n\n**Request Body:**\n- `jobId` (required): Unique job identifier\n- `displayName` (required): Human-readable name\n- `description` (optional): Job description\n- `category` (optional): Job category\n- `priority` (optional): Low, Normal, High, Critical\n- `timeoutMinutes` (optional): Execution timeout\n- `expectedDurationMinutes` (optional): Expected duration\n- `cronExpression` (optional): Schedule expression\n- `tags` (optional): List of tags\n- `metadata` (optional): Custom key-value pairs\n\n**Response:** 201 Created with JobDetailResponse"
+              }
+            },
+            {
+              "name": "Register Job",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Job registered', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "if (pm.response.code === 200) {",
+                      "    const data = pm.response.json();",
+                      "    pm.collectionVariables.set('jobId', data.jobId);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jobId\": \"AGENT-JOB-001\",\n  \"displayName\": \"Agent Registered Job\",\n  \"description\": \"Job registered by an agent at runtime\",\n  \"priority\": \"Normal\",\n  \"timeoutMinutes\": 10,\n  \"tags\": [\"agent\", \"auto-registered\"]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/jobs/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "jobs", "register"]
+                },
+                "description": "Register a job (creates if not exists, updates if exists).\n\nThis endpoint is typically used by agents to self-register jobs at startup.\n\n**Request Body:** Same as Create Job\n\n**Response:** JobDetailResponse"
+              }
+            },
+            {
+              "name": "Get Job by ID",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Job retrieved', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/jobs/{{jobId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "jobs", "{{jobId}}"]
+                },
+                "description": "Get a job by its ID.\n\n**Path Parameters:**\n- `jobId`: Job identifier string\n\n**Response:** JobDetailResponse"
+              }
+            },
+            {
+              "name": "Get Job Detail",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/jobs/{{jobId}}/detail?recentExecutionCount=10",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "jobs", "{{jobId}}", "detail"],
+                  "query": [
+                    {
+                      "key": "recentExecutionCount",
+                      "value": "10"
+                    }
+                  ]
+                },
+                "description": "Get detailed job information including recent executions.\n\n**Path Parameters:**\n- `jobId`: Job identifier string\n\n**Query Parameters:**\n- `recentExecutionCount` (optional): 1-50, default 10\n\n**Response:** JobDetailResponse with recent executions"
+              }
+            },
+            {
+              "name": "Update Job",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"displayName\": \"Updated Job Name\",\n  \"description\": \"Updated description\",\n  \"category\": \"UpdatedCategory\",\n  \"priority\": \"Critical\",\n  \"timeoutMinutes\": 45,\n  \"expectedDurationMinutes\": 20,\n  \"cronExpression\": \"0 0 * * *\",\n  \"tags\": [\"updated\", \"production\"],\n  \"metadata\": {\n    \"owner\": \"ops-team\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/jobs/{{jobId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "jobs", "{{jobId}}"]
+                },
+                "description": "Update an existing job.\n\n**Path Parameters:**\n- `jobId`: Job identifier string\n\n**Request Body:** UpdateJobRequest (all fields optional)\n\n**Response:** Updated JobDetailResponse"
+              }
+            },
+            {
+              "name": "Delete Job",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/jobs/{{jobId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "jobs", "{{jobId}}"]
+                },
+                "description": "Delete a job and all its related data.\n\n**Path Parameters:**\n- `jobId`: Job identifier string\n\n**Response:** 204 No Content"
+              }
+            },
+            {
+              "name": "List Jobs",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/jobs?page=1&pageSize=50",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "jobs"],
+                  "query": [
+                    {
+                      "key": "search",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "category",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "priority",
+                      "value": "High",
+                      "disabled": true
+                    },
+                    {
+                      "key": "isActive",
+                      "value": "true",
+                      "disabled": true
+                    },
+                    {
+                      "key": "serverName",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "tags",
+                      "value": "critical,production",
+                      "disabled": true
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "50"
+                    }
+                  ]
+                },
+                "description": "List all jobs with filtering and pagination.\n\n**Query Parameters:**\n- `search` (optional): Search in job ID, name, description\n- `category` (optional): Filter by category\n- `priority` (optional): Filter by priority\n- `isActive` (optional): Filter by active status\n- `serverName` (optional): Filter by server\n- `tags` (optional): Comma-separated tags\n- `page` (optional): Page number (default: 1)\n- `pageSize` (optional): Items per page (default: 50)\n\n**Response:** PaginatedResult<JobListItem>"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Job Actions",
+          "item": [
+            {
+              "name": "Activate Job",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/jobs/{{jobId}}/activate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "jobs", "{{jobId}}", "activate"]
+                },
+                "description": "Activate a deactivated job.\n\n**Response:** 204 No Content"
+              }
+            },
+            {
+              "name": "Deactivate Job",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/jobs/{{jobId}}/deactivate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "jobs", "{{jobId}}", "deactivate"]
+                },
+                "description": "Deactivate a job (prevents new executions).\n\n**Response:** 204 No Content"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Job Queries",
+          "item": [
+            {
+              "name": "Get Jobs by Server",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/jobs/by-server/{{serverName}}?activeOnly=true",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "jobs", "by-server", "{{serverName}}"],
+                  "query": [
+                    {
+                      "key": "activeOnly",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Get all jobs associated with a specific server.\n\n**Path Parameters:**\n- `serverName`: Server name\n\n**Query Parameters:**\n- `activeOnly` (optional): Only active jobs (default: true)\n\n**Response:** List of JobListItem"
+              }
+            },
+            {
+              "name": "Get Jobs by Category",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/jobs/by-category/DataSync",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "jobs", "by-category", "DataSync"]
+                },
+                "description": "Get all jobs in a specific category.\n\n**Path Parameters:**\n- `category`: Category name\n\n**Response:** List of JobListItem"
+              }
+            },
+            {
+              "name": "Get Critical Jobs",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/jobs/critical",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "jobs", "critical"]
+                },
+                "description": "Get all jobs with Critical priority.\n\n**Response:** List of JobListItem"
+              }
+            },
+            {
+              "name": "Get Failed Jobs",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/jobs/failed",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "jobs", "failed"]
+                },
+                "description": "Get all jobs whose last execution failed.\n\n**Response:** List of JobListItem"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Job Health & Statistics",
+          "item": [
+            {
+              "name": "Get Job Health",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/jobs/{{jobId}}/health",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "jobs", "{{jobId}}", "health"]
+                },
+                "description": "Get health status for a specific job.\n\n**Response:** JobHealthResponse with:\n- `status`: Healthy, Warning, Critical, Unknown\n- `successRate`: Success percentage\n- `avgDuration`: Average execution duration\n- `lastExecution`: Last execution details\n- `issues`: List of current issues"
+              }
+            },
+            {
+              "name": "Get All Jobs Health",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/jobs/health",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "jobs", "health"]
+                },
+                "description": "Get health overview for all jobs.\n\n**Response:** JobHealthOverviewResponse with:\n- `totalJobs`: Total job count\n- `healthyCount`: Healthy jobs\n- `warningCount`: Jobs with warnings\n- `criticalCount`: Critical jobs\n- `unknownCount`: Unknown status\n- `jobs`: List of job health details"
+              }
+            },
+            {
+              "name": "Get Job Statistics",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/jobs/statistics",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "jobs", "statistics"]
+                },
+                "description": "Get aggregate statistics for all jobs.\n\n**Response:** JobHealthSummary with counts by status and priority"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Job Lookups",
+          "item": [
+            {
+              "name": "Get Categories",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/jobs/lookup/categories",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "jobs", "lookup", "categories"]
+                },
+                "description": "Get all distinct job categories.\n\n**Response:** List of category strings"
+              }
+            },
+            {
+              "name": "Get Tags",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/jobs/lookup/tags",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "jobs", "lookup", "tags"]
+                },
+                "description": "Get all distinct job tags.\n\n**Response:** List of tag strings"
+              }
+            },
+            {
+              "name": "Get Job Lookup Items",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/jobs/lookup/items?activeOnly=true",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "jobs", "lookup", "items"],
+                  "query": [
+                    {
+                      "key": "activeOnly",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Get simplified job list for dropdowns/lookups.\n\n**Query Parameters:**\n- `activeOnly` (optional): Only active jobs (default: true)\n\n**Response:** List of LookupItem (id, name)"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04. Executions",
+      "description": "Job execution endpoints for starting, completing, and monitoring job runs.",
+      "item": [
+        {
+          "name": "Execution Lifecycle",
+          "item": [
+            {
+              "name": "Start Execution",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Execution started', function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "if (pm.response.code === 201) {",
+                      "    const data = pm.response.json();",
+                      "    pm.collectionVariables.set('executionId', data.id);",
+                      "    console.log('Execution ID:', data.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"jobId\": \"{{jobId}}\",\n  \"triggerType\": \"Manual\",\n  \"triggeredBy\": \"PostmanTest\",\n  \"serverName\": \"{{serverName}}\",\n  \"parameters\": {\n    \"mode\": \"full\",\n    \"dryRun\": false\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/executions",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "executions"]
+                },
+                "description": "Start a new job execution.\n\n**Request Body:**\n- `jobId` (required): Job identifier\n- `triggerType` (required): Manual, Scheduled, Api, Event\n- `triggeredBy` (required): Who/what triggered the execution\n- `serverName` (optional): Server running the job\n- `parameters` (optional): Execution parameters\n\n**Response:** 201 Created with JobExecutionResponse"
+              }
+            },
+            {
+              "name": "Complete Execution (Success)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"Completed\",\n  \"resultMessage\": \"Job completed successfully. Processed 1500 records.\",\n  \"resultData\": {\n    \"recordsProcessed\": 1500,\n    \"errorsCount\": 0,\n    \"duration\": \"00:05:32\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/executions/{{executionId}}/complete",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "executions", "{{executionId}}", "complete"]
+                },
+                "description": "Complete a running execution with success or failure.\n\n**Path Parameters:**\n- `executionId`: Execution GUID\n\n**Request Body:**\n- `status` (required): Completed or Failed\n- `resultMessage` (optional): Completion message\n- `resultData` (optional): Result data object\n\n**Response:** Updated JobExecutionResponse"
+              }
+            },
+            {
+              "name": "Complete Execution (Failure)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"Failed\",\n  \"resultMessage\": \"Database connection timeout after 30 seconds\",\n  \"resultData\": {\n    \"errorCode\": \"DB_TIMEOUT\",\n    \"retryable\": true\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/executions/{{executionId}}/complete",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "executions", "{{executionId}}", "complete"]
+                },
+                "description": "Complete a running execution with failure status.\n\n**Request Body:**\n- `status`: \"Failed\"\n- `resultMessage`: Error description\n- `resultData` (optional): Error details"
+              }
+            },
+            {
+              "name": "Cancel Execution",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/executions/{{executionId}}/cancel?reason=User requested cancellation",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "executions", "{{executionId}}", "cancel"],
+                  "query": [
+                    {
+                      "key": "reason",
+                      "value": "User requested cancellation"
+                    }
+                  ]
+                },
+                "description": "Cancel a running execution.\n\n**Path Parameters:**\n- `executionId`: Execution GUID\n\n**Query Parameters:**\n- `reason` (optional): Cancellation reason\n\n**Response:** Updated JobExecutionResponse with Cancelled status"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Execution Queries",
+          "item": [
+            {
+              "name": "Get Execution by ID",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/executions/{{executionId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "executions", "{{executionId}}"]
+                },
+                "description": "Get an execution by its ID.\n\n**Response:** JobExecutionResponse"
+              }
+            },
+            {
+              "name": "Get Execution Detail",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/executions/{{executionId}}/detail",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "executions", "{{executionId}}", "detail"]
+                },
+                "description": "Get detailed execution information including logs.\n\n**Response:** JobExecutionDetailResponse with logs and events"
+              }
+            },
+            {
+              "name": "List Executions",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/executions?page=1&pageSize=50",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "executions"],
+                  "query": [
+                    {
+                      "key": "jobId",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "serverName",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "status",
+                      "value": "Completed",
+                      "disabled": true
+                    },
+                    {
+                      "key": "triggerType",
+                      "value": "Scheduled",
+                      "disabled": true
+                    },
+                    {
+                      "key": "startDate",
+                      "value": "2024-01-01T00:00:00Z",
+                      "disabled": true
+                    },
+                    {
+                      "key": "endDate",
+                      "value": "2024-12-31T23:59:59Z",
+                      "disabled": true
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "50"
+                    }
+                  ]
+                },
+                "description": "List all executions with filtering.\n\n**Query Parameters:**\n- `jobId` (optional): Filter by job\n- `serverName` (optional): Filter by server\n- `status` (optional): Running, Completed, Failed, Cancelled\n- `triggerType` (optional): Manual, Scheduled, Api, Event\n- `startDate` (optional): From date (ISO 8601)\n- `endDate` (optional): To date (ISO 8601)\n- `page`, `pageSize`: Pagination\n\n**Response:** PaginatedResult<JobExecutionResponse>"
+              }
+            },
+            {
+              "name": "Get Executions by Job",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/executions/by-job/{{jobId}}?page=1&pageSize=50",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "executions", "by-job", "{{jobId}}"],
+                  "query": [
+                    {
+                      "key": "startDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "endDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "50"
+                    }
+                  ]
+                },
+                "description": "Get all executions for a specific job.\n\n**Response:** PaginatedResult<JobExecutionResponse>"
+              }
+            },
+            {
+              "name": "Get Recent Executions by Job",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/executions/by-job/{{jobId}}/recent?count=10",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "executions", "by-job", "{{jobId}}", "recent"],
+                  "query": [
+                    {
+                      "key": "count",
+                      "value": "10"
+                    }
+                  ]
+                },
+                "description": "Get most recent executions for a job.\n\n**Query Parameters:**\n- `count` (optional): 1-100, default 10\n\n**Response:** List of JobExecutionResponse"
+              }
+            },
+            {
+              "name": "Get Last Execution by Job",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/executions/by-job/{{jobId}}/last",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "executions", "by-job", "{{jobId}}", "last"]
+                },
+                "description": "Get the most recent execution for a job.\n\n**Response:** JobExecutionResponse or 404 if no executions"
+              }
+            },
+            {
+              "name": "Get Running Executions",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/executions/running",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "executions", "running"]
+                },
+                "description": "Get all currently running executions.\n\n**Response:** List of JobExecutionResponse"
+              }
+            },
+            {
+              "name": "Get Running Executions by Server",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/executions/running/by-server/{{serverName}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "executions", "running", "by-server", "{{serverName}}"]
+                },
+                "description": "Get running executions on a specific server.\n\n**Response:** List of JobExecutionResponse"
+              }
+            },
+            {
+              "name": "Check if Job is Running",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/executions/is-running/{{jobId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "executions", "is-running", "{{jobId}}"]
+                },
+                "description": "Check if a job currently has a running execution.\n\n**Response:** { JobId, IsRunning: boolean }"
+              }
+            },
+            {
+              "name": "Get Overdue Executions",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/executions/overdue",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "executions", "overdue"]
+                },
+                "description": "Get executions that have exceeded their expected duration.\n\n**Response:** List of JobExecutionResponse"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Execution Failures",
+          "item": [
+            {
+              "name": "Get Recent Failures",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/executions/failures/recent?count=20",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "executions", "failures", "recent"],
+                  "query": [
+                    {
+                      "key": "count",
+                      "value": "20"
+                    },
+                    {
+                      "key": "serverName",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Get most recent failed executions.\n\n**Query Parameters:**\n- `count` (optional): 1-100, default 20\n- `serverName` (optional): Filter by server\n\n**Response:** List of JobExecutionResponse"
+              }
+            },
+            {
+              "name": "Get Consecutive Failures",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/executions/failures/consecutive/{{jobId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "executions", "failures", "consecutive", "{{jobId}}"]
+                },
+                "description": "Get the count of consecutive failures for a job.\n\n**Response:** { JobId, ConsecutiveFailures: number }"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Execution Statistics",
+          "item": [
+            {
+              "name": "Get Execution Statistics",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/executions/statistics/{{jobId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "executions", "statistics", "{{jobId}}"],
+                  "query": [
+                    {
+                      "key": "startDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "endDate",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Get execution statistics for a job.\n\n**Query Parameters:**\n- `startDate` (optional): From date (default: -30 days)\n- `endDate` (optional): To date (default: now)\n\n**Response:** ExecutionStatistics with:\n- `totalExecutions`\n- `successCount`, `failureCount`\n- `successRate`\n- `avgDuration`, `minDuration`, `maxDuration`"
+              }
+            },
+            {
+              "name": "Get Execution Trend",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/executions/trend?interval=Hour",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "executions", "trend"],
+                  "query": [
+                    {
+                      "key": "startDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "endDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "interval",
+                      "value": "Hour"
+                    },
+                    {
+                      "key": "jobId",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Get execution trend over time.\n\n**Query Parameters:**\n- `startDate` (optional): From date (default: -1 day)\n- `endDate` (optional): To date (default: now)\n- `interval` (optional): Minute, Hour, Day, Week (default: Hour)\n- `jobId` (optional): Filter by job\n\n**Response:** List of ExecutionTrendPoint"
+              }
+            },
+            {
+              "name": "Get Counts by Status",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/executions/counts-by-status",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "executions", "counts-by-status"],
+                  "query": [
+                    {
+                      "key": "startDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "endDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "jobId",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Get execution counts grouped by status.\n\n**Query Parameters:**\n- `startDate`, `endDate` (optional): Date range\n- `jobId` (optional): Filter by job\n\n**Response:** Dictionary<JobStatus, int>"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05. Logs",
+      "description": "Log ingestion and querying endpoints for centralized logging.",
+      "item": [
+        {
+          "name": "Log Ingestion",
+          "item": [
+            {
+              "name": "Create Single Log",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Log created', function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "if (pm.response.code === 201) {",
+                      "    const data = pm.response.json();",
+                      "    pm.collectionVariables.set('logId', data.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"timestamp\": \"{{$isoTimestamp}}\",\n  \"level\": \"Information\",\n  \"message\": \"User login successful\",\n  \"messageTemplate\": \"User {Username} login successful\",\n  \"jobId\": \"{{jobId}}\",\n  \"jobExecutionId\": \"{{executionId}}\",\n  \"serverName\": \"{{serverName}}\",\n  \"category\": \"Authentication\",\n  \"sourceContext\": \"AuthService\",\n  \"correlationId\": \"corr-12345\",\n  \"traceId\": \"trace-abc123\",\n  \"spanId\": \"span-001\",\n  \"properties\": {\n    \"Username\": \"admin\",\n    \"IpAddress\": \"192.168.1.100\"\n  },\n  \"tags\": [\"auth\", \"login\"],\n  \"environment\": \"Production\",\n  \"applicationVersion\": \"1.0.0\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/logs",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "logs"]
+                },
+                "description": "Create a single log entry.\n\n**Request Body:**\n- `timestamp` (optional): UTC timestamp (default: now)\n- `level` (required): Trace, Debug, Information, Warning, Error, Critical\n- `message` (required): Log message (max 8000 chars)\n- `messageTemplate` (optional): Structured log template\n- `jobId` (optional): Associated job ID\n- `jobExecutionId` (optional): Associated execution ID\n- `serverName` (optional): Source server\n- `category` (optional): Log category\n- `sourceContext` (optional): Source class/component\n- `correlationId` (optional): Request correlation ID\n- `traceId`, `spanId`, `parentSpanId` (optional): Distributed tracing\n- `exception` (optional): Exception details\n- `properties` (optional): Custom properties\n- `tags` (optional): Tags for filtering\n- `environment` (optional): Environment name\n- `applicationVersion` (optional): App version\n\n**Response:** 201 Created with LogIngestionResult"
+              }
+            },
+            {
+              "name": "Create Log with Exception",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"level\": \"Error\",\n  \"message\": \"Failed to process order: Database connection timeout\",\n  \"jobId\": \"{{jobId}}\",\n  \"serverName\": \"{{serverName}}\",\n  \"category\": \"OrderProcessing\",\n  \"exception\": {\n    \"type\": \"System.TimeoutException\",\n    \"message\": \"The operation has timed out.\",\n    \"stackTrace\": \"   at OrderService.ProcessOrder() in OrderService.cs:line 45\\n   at OrderController.Submit() in OrderController.cs:line 23\",\n    \"source\": \"OrderService\",\n    \"innerException\": {\n      \"type\": \"SqlClient.SqlException\",\n      \"message\": \"Connection timeout expired\"\n    }\n  },\n  \"properties\": {\n    \"OrderId\": \"ORD-12345\",\n    \"CustomerId\": \"CUST-001\"\n  },\n  \"tags\": [\"error\", \"database\", \"timeout\"]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/logs",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "logs"]
+                },
+                "description": "Create a log entry with exception details.\n\n**Exception Object:**\n- `type`: Exception type name\n- `message`: Exception message\n- `stackTrace`: Full stack trace\n- `source`: Source component\n- `innerException` (optional): Nested exception"
+              }
+            },
+            {
+              "name": "Create Batch Logs",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"logs\": [\n    {\n      \"level\": \"Information\",\n      \"message\": \"Job started\",\n      \"jobId\": \"{{jobId}}\",\n      \"serverName\": \"{{serverName}}\"\n    },\n    {\n      \"level\": \"Debug\",\n      \"message\": \"Processing step 1 of 5\",\n      \"jobId\": \"{{jobId}}\",\n      \"serverName\": \"{{serverName}}\"\n    },\n    {\n      \"level\": \"Warning\",\n      \"message\": \"Slow query detected: 2500ms\",\n      \"jobId\": \"{{jobId}}\",\n      \"serverName\": \"{{serverName}}\",\n      \"properties\": {\n        \"QueryTime\": 2500,\n        \"Query\": \"SELECT * FROM Orders\"\n      }\n    },\n    {\n      \"level\": \"Information\",\n      \"message\": \"Job completed successfully\",\n      \"jobId\": \"{{jobId}}\",\n      \"serverName\": \"{{serverName}}\"\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/logs/batch",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "logs", "batch"]
+                },
+                "description": "Create multiple log entries in a single request.\n\n**Request Body:**\n- `logs` (required): Array of log entries (max 10,000)\n\n**Response:** BatchLogResult with:\n- `totalReceived`: Number of logs received\n- `successCount`: Successfully ingested\n- `failureCount`: Failed to ingest\n- `errors`: List of errors (if any)"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Log Queries",
+          "item": [
+            {
+              "name": "Get Log by ID",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/logs/{{logId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "logs", "{{logId}}"]
+                },
+                "description": "Get a log entry by its ID.\n\n**Response:** LogEntryResponse"
+              }
+            },
+            {
+              "name": "Get Log Detail",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/logs/{{logId}}/detail",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "logs", "{{logId}}", "detail"]
+                },
+                "description": "Get detailed log entry with all properties.\n\n**Response:** LogEntryDetailResponse with full properties and exception"
+              }
+            },
+            {
+              "name": "Search Logs",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/logs?page=1&pageSize=50",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "logs"],
+                  "query": [
+                    {
+                      "key": "startDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "endDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "jobId",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "jobExecutionId",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "serverName",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "minLevel",
+                      "value": "Warning",
+                      "disabled": true
+                    },
+                    {
+                      "key": "maxLevel",
+                      "value": "Critical",
+                      "disabled": true
+                    },
+                    {
+                      "key": "search",
+                      "value": "error",
+                      "disabled": true
+                    },
+                    {
+                      "key": "exceptionType",
+                      "value": "TimeoutException",
+                      "disabled": true
+                    },
+                    {
+                      "key": "correlationId",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "hasException",
+                      "value": "true",
+                      "disabled": true
+                    },
+                    {
+                      "key": "tags",
+                      "value": "error,critical",
+                      "disabled": true
+                    },
+                    {
+                      "key": "category",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "environment",
+                      "value": "Production",
+                      "disabled": true
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "50"
+                    }
+                  ]
+                },
+                "description": "Search logs with comprehensive filtering.\n\n**Query Parameters:**\n- `startDate`, `endDate`: Date range (default: last 24 hours)\n- `jobId`: Filter by job\n- `jobExecutionId`: Filter by execution\n- `serverName`: Filter by server\n- `minLevel`, `maxLevel`: Log level range\n- `search`: Full-text search in message\n- `exceptionType`: Filter by exception type\n- `correlationId`: Filter by correlation ID\n- `hasException`: Only logs with exceptions\n- `tags`: Comma-separated tags\n- `category`: Log category\n- `environment`: Environment name\n- `page`, `pageSize`: Pagination\n\n**Response:** PaginatedResult<LogEntryResponse>"
+              }
+            },
+            {
+              "name": "Get Logs by Correlation ID",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/logs/correlation/corr-12345",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "logs", "correlation", "corr-12345"]
+                },
+                "description": "Get all logs with a specific correlation ID.\n\nUseful for tracing a request across multiple services.\n\n**Response:** List of LogEntryResponse"
+              }
+            },
+            {
+              "name": "Get Logs by Trace ID",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/logs/trace/trace-abc123",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "logs", "trace", "trace-abc123"]
+                },
+                "description": "Get all logs with a specific distributed trace ID.\n\n**Response:** List of LogEntryResponse"
+              }
+            },
+            {
+              "name": "Get Logs by Execution",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/logs/execution/{{executionId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "logs", "execution", "{{executionId}}"],
+                  "query": [
+                    {
+                      "key": "minLevel",
+                      "value": "Warning",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Get all logs for a job execution.\n\n**Query Parameters:**\n- `minLevel` (optional): Minimum log level\n\n**Response:** List of LogEntryResponse"
+              }
+            },
+            {
+              "name": "Get Recent Errors",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/logs/errors/recent?count=50",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "logs", "errors", "recent"],
+                  "query": [
+                    {
+                      "key": "count",
+                      "value": "50"
+                    },
+                    {
+                      "key": "serverName",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "jobId",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Get most recent error logs.\n\n**Query Parameters:**\n- `count` (optional): 1-500, default 50\n- `serverName` (optional): Filter by server\n- `jobId` (optional): Filter by job\n\n**Response:** List of RecentErrorResponse"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Log Statistics",
+          "item": [
+            {
+              "name": "Get Log Statistics",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/logs/statistics?interval=Hour",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "logs", "statistics"],
+                  "query": [
+                    {
+                      "key": "startDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "endDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "jobId",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "serverName",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "interval",
+                      "value": "Hour"
+                    }
+                  ]
+                },
+                "description": "Get log statistics summary.\n\n**Query Parameters:**\n- `startDate`, `endDate`: Date range (default: last 24 hours)\n- `jobId`, `serverName`: Filters\n- `interval`: Minute, Hour, Day, Week\n\n**Response:** LogStatisticsResponse with counts by level"
+              }
+            },
+            {
+              "name": "Get Log Trend",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/logs/trend?interval=Hour",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "logs", "trend"],
+                  "query": [
+                    {
+                      "key": "startDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "endDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "interval",
+                      "value": "Hour"
+                    },
+                    {
+                      "key": "serverName",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "jobId",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Get log volume trend over time.\n\n**Response:** List of LogTrendPoint with timestamp and counts"
+              }
+            },
+            {
+              "name": "Get Counts by Level",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/logs/counts-by-level",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "logs", "counts-by-level"],
+                  "query": [
+                    {
+                      "key": "startDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "endDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "serverName",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "jobId",
+                      "value": "",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Get log counts grouped by level.\n\n**Response:** Dictionary<LogLevel, long>"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Log Lookups",
+          "item": [
+            {
+              "name": "Get Servers",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/logs/lookup/servers",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "logs", "lookup", "servers"]
+                },
+                "description": "Get all distinct server names from logs.\n\n**Response:** List of server name strings"
+              }
+            },
+            {
+              "name": "Get Jobs",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/logs/lookup/jobs",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "logs", "lookup", "jobs"]
+                },
+                "description": "Get all distinct job IDs from logs.\n\n**Response:** List of job ID strings"
+              }
+            },
+            {
+              "name": "Get Categories",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/logs/lookup/categories",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "logs", "lookup", "categories"]
+                },
+                "description": "Get all distinct log categories.\n\n**Response:** List of category strings"
+              }
+            },
+            {
+              "name": "Get Tags",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/logs/lookup/tags",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "logs", "lookup", "tags"]
+                },
+                "description": "Get all distinct log tags.\n\n**Response:** List of tag strings"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Log Export",
+          "item": [
+            {
+              "name": "Export Logs (CSV)",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/logs/export?format=Csv&maxRecords=1000",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "logs", "export"],
+                  "query": [
+                    {
+                      "key": "startDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "endDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "format",
+                      "value": "Csv"
+                    },
+                    {
+                      "key": "maxRecords",
+                      "value": "1000"
+                    },
+                    {
+                      "key": "fields",
+                      "value": "Timestamp,Level,Message,JobId,ServerName",
+                      "disabled": true
+                    },
+                    {
+                      "key": "jobId",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "serverName",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "minLevel",
+                      "value": "Warning",
+                      "disabled": true
+                    }
+                  ]
+                },
+                "description": "Export logs to CSV format.\n\n**Query Parameters:**\n- `startDate`, `endDate`: Date range\n- `format`: Csv or Json (default: Json)\n- `maxRecords`: 1-100,000 (default: 10,000)\n- `fields` (optional): Comma-separated field names\n- Plus all search filters\n\n**Response:** CSV file download (text/csv)"
+              }
+            },
+            {
+              "name": "Export Logs (JSON)",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/logs/export?format=Json&maxRecords=1000",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "logs", "export"],
+                  "query": [
+                    {
+                      "key": "format",
+                      "value": "Json"
+                    },
+                    {
+                      "key": "maxRecords",
+                      "value": "1000"
+                    }
+                  ]
+                },
+                "description": "Export logs to JSON format.\n\n**Response:** JSON file download"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06. Servers",
+      "description": "Server management and heartbeat endpoints for monitoring agent servers.",
+      "item": [
+        {
+          "name": "Server CRUD",
+          "item": [
+            {
+              "name": "Create Server",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Server created', function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "if (pm.response.code === 201) {",
+                      "    const data = pm.response.json();",
+                      "    pm.collectionVariables.set('serverName', data.serverName);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"serverName\": \"APP-SERVER-01\",\n  \"displayName\": \"Application Server 01\",\n  \"description\": \"Primary application server for production workloads\",\n  \"ipAddress\": \"192.168.1.10\",\n  \"operatingSystem\": \"Windows Server 2022\",\n  \"agentVersion\": \"1.0.0\",\n  \"tags\": [\"production\", \"primary\"],\n  \"metadata\": {\n    \"datacenter\": \"DC1\",\n    \"rack\": \"R01\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/servers",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "servers"]
+                },
+                "description": "Register a new server.\n\n**Request Body:**\n- `serverName` (required): Unique server identifier\n- `displayName` (optional): Human-readable name\n- `description` (optional): Server description\n- `ipAddress` (optional): Server IP address\n- `operatingSystem` (optional): OS information\n- `agentVersion` (optional): Agent version\n- `tags` (optional): Tags for filtering\n- `metadata` (optional): Custom key-value pairs\n\n**Response:** 201 Created with ServerResponse"
+              }
+            },
+            {
+              "name": "Get Server by Name",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Server retrieved', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/servers/{{serverName}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "servers", "{{serverName}}"]
+                },
+                "description": "Get a server by its name.\n\n**Response:** ServerResponse"
+              }
+            },
+            {
+              "name": "Get Server Detail",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/servers/{{serverName}}/detail",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "servers", "{{serverName}}", "detail"]
+                },
+                "description": "Get detailed server information including running jobs.\n\n**Response:** ServerDetailResponse with:\n- Server info\n- Running executions\n- Recent heartbeat data\n- Associated jobs"
+              }
+            },
+            {
+              "name": "Update Server",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"displayName\": \"Updated Server Name\",\n  \"description\": \"Updated description\",\n  \"ipAddress\": \"192.168.1.20\",\n  \"tags\": [\"production\", \"updated\"],\n  \"metadata\": {\n    \"datacenter\": \"DC2\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/servers/{{serverName}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "servers", "{{serverName}}"]
+                },
+                "description": "Update server information.\n\n**Response:** Updated ServerResponse"
+              }
+            },
+            {
+              "name": "Delete Server",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/servers/{{serverName}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "servers", "{{serverName}}"]
+                },
+                "description": "Delete a server registration.\n\n**Response:** 204 No Content"
+              }
+            },
+            {
+              "name": "List Servers",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/servers?activeOnly=true",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "servers"],
+                  "query": [
+                    {
+                      "key": "activeOnly",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "List all registered servers.\n\n**Query Parameters:**\n- `activeOnly` (optional): Only active servers (default: true)\n\n**Response:** List of ServerResponse"
+              }
+            },
+            {
+              "name": "Get Servers by Status",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/servers/by-status/Online",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "servers", "by-status", "Online"]
+                },
+                "description": "Get servers by their status.\n\n**Path Parameters:**\n- `status`: Online, Offline, Maintenance, Unknown\n\n**Response:** List of ServerResponse"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Server Heartbeat",
+          "item": [
+            {
+              "name": "Send Heartbeat",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Heartbeat accepted', function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"serverName\": \"{{serverName}}\",\n  \"timestamp\": \"{{$isoTimestamp}}\",\n  \"agentVersion\": \"1.0.0\",\n  \"status\": \"Online\",\n  \"cpuUsagePercent\": 45.5,\n  \"memoryUsagePercent\": 62.3,\n  \"diskUsagePercent\": 78.1,\n  \"runningJobCount\": 2,\n  \"metadata\": {\n    \"uptime\": \"5d 12h 30m\",\n    \"activeConnections\": 15\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/servers/heartbeat",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "servers", "heartbeat"]
+                },
+                "description": "Send a heartbeat from an agent server.\n\n**Request Body:**\n- `serverName` (required): Server identifier\n- `timestamp` (optional): Heartbeat timestamp\n- `agentVersion` (optional): Agent version\n- `status` (optional): Server status\n- `cpuUsagePercent` (optional): CPU usage 0-100\n- `memoryUsagePercent` (optional): Memory usage 0-100\n- `diskUsagePercent` (optional): Disk usage 0-100\n- `runningJobCount` (optional): Current running jobs\n- `metadata` (optional): Additional metrics\n\n**Response:** ServerResponse with updated status"
+              }
+            },
+            {
+              "name": "Get Unresponsive Servers",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/servers/unresponsive?timeoutSeconds=300",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "servers", "unresponsive"],
+                  "query": [
+                    {
+                      "key": "timeoutSeconds",
+                      "value": "300"
+                    }
+                  ]
+                },
+                "description": "Get servers that haven't sent a heartbeat within the timeout period.\n\n**Query Parameters:**\n- `timeoutSeconds` (optional): Timeout in seconds (default: 300)\n\n**Response:** List of unresponsive ServerResponse"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Server Actions",
+          "item": [
+            {
+              "name": "Activate Server",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/servers/{{serverName}}/activate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "servers", "{{serverName}}", "activate"]
+                },
+                "description": "Activate a deactivated server.\n\n**Response:** 204 No Content"
+              }
+            },
+            {
+              "name": "Deactivate Server",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/servers/{{serverName}}/deactivate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "servers", "{{serverName}}", "deactivate"]
+                },
+                "description": "Deactivate a server.\n\n**Response:** 204 No Content"
+              }
+            },
+            {
+              "name": "Set Maintenance Mode",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/servers/{{serverName}}/maintenance?inMaintenance=true",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "servers", "{{serverName}}", "maintenance"],
+                  "query": [
+                    {
+                      "key": "inMaintenance",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Put server in or out of maintenance mode.\n\n**Query Parameters:**\n- `inMaintenance` (optional): true to enable, false to disable\n\n**Response:** 204 No Content"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Server Statistics",
+          "item": [
+            {
+              "name": "Get Server Status Summary",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/servers/statistics/summary",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "servers", "statistics", "summary"]
+                },
+                "description": "Get summary of all server statuses.\n\n**Response:** ServerStatusSummary with:\n- `totalServers`: Total count\n- `onlineCount`: Online servers\n- `offlineCount`: Offline servers\n- `maintenanceCount`: In maintenance\n- `unknownCount`: Unknown status"
+              }
+            },
+            {
+              "name": "Get Server Lookup Items",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/servers/lookup/items?activeOnly=true",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "servers", "lookup", "items"],
+                  "query": [
+                    {
+                      "key": "activeOnly",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Get simplified server list for dropdowns.\n\n**Response:** List of LookupItem (id, name)"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "07. Alerts",
+      "description": "Alert configuration and instance management endpoints.",
+      "item": [
+        {
+          "name": "Alert Configuration",
+          "item": [
+            {
+              "name": "Create Alert",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test('Alert created', function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "if (pm.response.code === 201) {",
+                      "    const data = pm.response.json();",
+                      "    pm.collectionVariables.set('alertId', data.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Job Failure Alert\",\n  \"description\": \"Triggers when a job fails more than 3 times consecutively\",\n  \"alertType\": \"JobFailure\",\n  \"severity\": \"High\",\n  \"isActive\": true,\n  \"jobId\": \"{{jobId}}\",\n  \"conditions\": {\n    \"consecutiveFailures\": 3,\n    \"timeWindowMinutes\": 60\n  },\n  \"throttleMinutes\": 30,\n  \"notificationChannels\": [\"email\", \"slack\"],\n  \"recipients\": [\"ops-team@example.com\"],\n  \"metadata\": {\n    \"escalation\": \"on-call\"\n  }\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts"]
+                },
+                "description": "Create a new alert configuration.\n\n**Request Body:**\n- `name` (required): Alert name\n- `description` (optional): Alert description\n- `alertType` (required): JobFailure, ExecutionTimeout, LogError, ServerDown, etc.\n- `severity` (required): Low, Medium, High, Critical\n- `isActive` (optional): Enable/disable alert\n- `jobId` (optional): Associated job\n- `conditions` (optional): Alert trigger conditions\n- `throttleMinutes` (optional): Minimum time between alerts\n- `notificationChannels` (optional): Channels to notify\n- `recipients` (optional): Email recipients\n- `metadata` (optional): Custom data\n\n**Response:** 201 Created with AlertResponse"
+              }
+            },
+            {
+              "name": "Get Alert by ID",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts/{{alertId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts", "{{alertId}}"]
+                },
+                "description": "Get an alert configuration by ID.\n\n**Response:** AlertResponse"
+              }
+            },
+            {
+              "name": "Get Alert Detail",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts/{{alertId}}/detail?recentInstanceCount=10",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts", "{{alertId}}", "detail"],
+                  "query": [
+                    {
+                      "key": "recentInstanceCount",
+                      "value": "10"
+                    }
+                  ]
+                },
+                "description": "Get detailed alert info with recent instances.\n\n**Query Parameters:**\n- `recentInstanceCount` (optional): 1-50 instances\n\n**Response:** AlertDetailResponse"
+              }
+            },
+            {
+              "name": "Update Alert",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Updated Alert Name\",\n  \"description\": \"Updated description\",\n  \"severity\": \"Critical\",\n  \"isActive\": true,\n  \"conditions\": {\n    \"consecutiveFailures\": 5\n  },\n  \"throttleMinutes\": 15\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts/{{alertId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts", "{{alertId}}"]
+                },
+                "description": "Update an alert configuration.\n\n**Response:** Updated AlertResponse"
+              }
+            },
+            {
+              "name": "Delete Alert",
+              "request": {
+                "method": "DELETE",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts/{{alertId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts", "{{alertId}}"]
+                },
+                "description": "Delete an alert configuration.\n\n**Response:** 204 No Content"
+              }
+            },
+            {
+              "name": "List Alerts",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts?activeOnly=true",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts"],
+                  "query": [
+                    {
+                      "key": "activeOnly",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "List all alert configurations.\n\n**Query Parameters:**\n- `activeOnly` (optional): Only active alerts (default: true)\n\n**Response:** List of AlertResponse"
+              }
+            },
+            {
+              "name": "Get Alerts by Type",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts/by-type/JobFailure",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts", "by-type", "JobFailure"]
+                },
+                "description": "Get alerts by type.\n\n**Path Parameters:**\n- `alertType`: JobFailure, ExecutionTimeout, LogError, etc.\n\n**Response:** List of AlertResponse"
+              }
+            },
+            {
+              "name": "Get Alerts by Job",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts/by-job/{{jobId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts", "by-job", "{{jobId}}"]
+                },
+                "description": "Get all alerts for a specific job.\n\n**Response:** List of AlertResponse"
+              }
+            },
+            {
+              "name": "Activate Alert",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts/{{alertId}}/activate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts", "{{alertId}}", "activate"]
+                },
+                "description": "Activate a disabled alert.\n\n**Response:** 204 No Content"
+              }
+            },
+            {
+              "name": "Deactivate Alert",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts/{{alertId}}/deactivate",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts", "{{alertId}}", "deactivate"]
+                },
+                "description": "Deactivate an alert.\n\n**Response:** 204 No Content"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Alert Instances",
+          "item": [
+            {
+              "name": "Search Alert Instances",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts/instances?page=1&pageSize=50",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts", "instances"],
+                  "query": [
+                    {
+                      "key": "alertId",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "severity",
+                      "value": "High",
+                      "disabled": true
+                    },
+                    {
+                      "key": "isActive",
+                      "value": "true",
+                      "disabled": true
+                    },
+                    {
+                      "key": "isAcknowledged",
+                      "value": "false",
+                      "disabled": true
+                    },
+                    {
+                      "key": "startDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "endDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "50"
+                    }
+                  ]
+                },
+                "description": "Search alert instances with filtering.\n\n**Query Parameters:**\n- `alertId` (optional): Filter by alert configuration\n- `severity` (optional): Filter by severity\n- `isActive` (optional): Active instances only\n- `isAcknowledged` (optional): Acknowledged status\n- `startDate`, `endDate`: Date range\n- `page`, `pageSize`: Pagination\n\n**Response:** PaginatedResult<AlertInstanceResponse>"
+              }
+            },
+            {
+              "name": "Get Active Instances",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts/instances/active",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts", "instances", "active"]
+                },
+                "description": "Get all currently active (unresolved) alert instances.\n\n**Response:** List of AlertInstanceResponse"
+              }
+            },
+            {
+              "name": "Get Unacknowledged Instances",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts/instances/unacknowledged",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts", "instances", "unacknowledged"]
+                },
+                "description": "Get all unacknowledged alert instances.\n\n**Response:** List of AlertInstanceResponse"
+              }
+            },
+            {
+              "name": "Get Instance by ID",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "if (pm.response.code === 200) {",
+                      "    const data = pm.response.json();",
+                      "    pm.collectionVariables.set('alertInstanceId', data.id);",
+                      "}"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts/instances/{{alertInstanceId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts", "instances", "{{alertInstanceId}}"]
+                },
+                "description": "Get an alert instance by ID.\n\n**Response:** AlertInstanceResponse"
+              }
+            },
+            {
+              "name": "Acknowledge Instance",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"note\": \"Acknowledged - investigating the issue\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts/instances/{{alertInstanceId}}/acknowledge",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts", "instances", "{{alertInstanceId}}", "acknowledge"]
+                },
+                "description": "Acknowledge an alert instance.\n\n**Request Body (optional):**\n- `note`: Acknowledgement note\n\n**Response:** 204 No Content"
+              }
+            },
+            {
+              "name": "Resolve Instance",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"resolution\": \"Fixed the database connection issue\",\n  \"note\": \"Root cause: connection pool exhaustion\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts/instances/{{alertInstanceId}}/resolve",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts", "instances", "{{alertInstanceId}}", "resolve"]
+                },
+                "description": "Resolve an alert instance.\n\n**Request Body (optional):**\n- `resolution`: Resolution description\n- `note`: Additional notes\n\n**Response:** 204 No Content"
+              }
+            },
+            {
+              "name": "Bulk Acknowledge",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instanceIds\": [\n    \"{{alertInstanceId}}\"\n  ],\n  \"note\": \"Bulk acknowledged during incident response\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts/instances/bulk-acknowledge",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts", "instances", "bulk-acknowledge"]
+                },
+                "description": "Acknowledge multiple alert instances at once.\n\n**Request Body:**\n- `instanceIds` (required): List of instance GUIDs\n- `note` (optional): Acknowledgement note\n\n**Response:** { AcknowledgedCount: number }"
+              }
+            },
+            {
+              "name": "Bulk Resolve",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"instanceIds\": [\n    \"{{alertInstanceId}}\"\n  ],\n  \"note\": \"Bulk resolved - incident closed\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts/instances/bulk-resolve",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts", "instances", "bulk-resolve"]
+                },
+                "description": "Resolve multiple alert instances at once.\n\n**Request Body:**\n- `instanceIds` (required): List of instance GUIDs\n- `note` (optional): Resolution note\n\n**Response:** { ResolvedCount: number }"
+              }
+            },
+            {
+              "name": "Get Instance Summary",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts/instances/summary",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts", "instances", "summary"]
+                },
+                "description": "Get alert instance summary.\n\n**Response:** AlertSummary with:\n- `totalActive`: Active count\n- `totalUnacknowledged`: Unacknowledged count\n- `bySeverity`: Counts by severity\n- `byType`: Counts by alert type"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Alert Trigger",
+          "item": [
+            {
+              "name": "Trigger Alert Manually",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"alertId\": \"{{alertId}}\",\n  \"message\": \"Manual trigger for testing purposes\",\n  \"context\": {\n    \"triggeredBy\": \"API Test\",\n    \"reason\": \"Testing alert notification\"\n  },\n  \"jobId\": \"{{jobId}}\",\n  \"serverName\": \"{{serverName}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/alerts/trigger",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "alerts", "trigger"]
+                },
+                "description": "Manually trigger an alert.\n\n**Request Body:**\n- `alertId` (required): Alert configuration ID\n- `message` (required): Alert message\n- `context` (optional): Additional context data\n- `jobId` (optional): Associated job\n- `serverName` (optional): Associated server\n\n**Response:** AlertInstanceResponse or 204 No Content (if throttled)"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "08. Dashboard",
+      "description": "Dashboard endpoints for overview and summary data.",
+      "item": [
+        {
+          "name": "Get Dashboard Summary",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/dashboard/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "dashboard", "summary"]
+            },
+            "description": "Get complete dashboard summary.\n\n**Response:** DashboardSummaryResponse with:\n- `serverStats`: Server status counts\n- `jobStats`: Job health summary\n- `executionStats`: Recent execution statistics\n- `logStats`: Log level counts\n- `alertStats`: Active alert counts"
+          }
+        },
+        {
+          "name": "Get Log Trend",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/dashboard/log-trend?hours=24&interval=Hour",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "dashboard", "log-trend"],
+              "query": [
+                {
+                  "key": "hours",
+                  "value": "24"
+                },
+                {
+                  "key": "interval",
+                  "value": "Hour"
+                }
+              ]
+            },
+            "description": "Get log volume trend for dashboard chart.\n\n**Query Parameters:**\n- `hours` (optional): 1-168, default 24\n- `interval` (optional): Minute, Hour, Day (default: Hour)\n\n**Response:** List of LogTrendPoint"
+          }
+        },
+        {
+          "name": "Get Recent Errors",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/dashboard/recent-errors?count=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "dashboard", "recent-errors"],
+              "query": [
+                {
+                  "key": "count",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get recent error logs for dashboard.\n\n**Query Parameters:**\n- `count` (optional): 1-50, default 10\n\n**Response:** List of RecentErrorResponse"
+          }
+        },
+        {
+          "name": "Get Recent Failures",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/dashboard/recent-failures?count=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "dashboard", "recent-failures"],
+              "query": [
+                {
+                  "key": "count",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get recent job execution failures.\n\n**Query Parameters:**\n- `count` (optional): 1-50, default 10\n\n**Response:** List of RecentFailure"
+          }
+        },
+        {
+          "name": "Get Job Health Overview",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/dashboard/job-health?count=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "dashboard", "job-health"],
+              "query": [
+                {
+                  "key": "count",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get job health overview for dashboard.\n\n**Query Parameters:**\n- `count` (optional): 1-50, default 10\n\n**Response:** JobHealthOverviewResponse"
+          }
+        },
+        {
+          "name": "Get Active Alerts",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/dashboard/active-alerts?count=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "dashboard", "active-alerts"],
+              "query": [
+                {
+                  "key": "count",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get active alert instances for dashboard.\n\n**Query Parameters:**\n- `count` (optional): 1-50, default 10\n\n**Response:** List of AlertInstanceListItem"
+          }
+        },
+        {
+          "name": "Get Running Jobs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/dashboard/running-jobs",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "dashboard", "running-jobs"]
+            },
+            "description": "Get currently running job executions.\n\n**Response:** List of RunningJobInfo"
+          }
+        },
+        {
+          "name": "Get Server Statuses",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/{{apiVersion}}/dashboard/server-statuses",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "{{apiVersion}}", "dashboard", "server-statuses"]
+            },
+            "description": "Get server status overview.\n\n**Response:** List of ServerStatusResponse"
+          }
+        }
+      ]
+    },
+    {
+      "name": "09. System",
+      "description": "System administration endpoints for configuration, audit logs, and maintenance.",
+      "item": [
+        {
+          "name": "Configuration",
+          "item": [
+            {
+              "name": "Get All Configuration",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/config",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "config"]
+                },
+                "description": "Get all system configuration items (Admin only).\n\n**Response:** List of ConfigurationItemResponse"
+              }
+            },
+            {
+              "name": "Get Configuration by Category",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/config/category/Security",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "config", "category", "Security"]
+                },
+                "description": "Get configuration items by category.\n\n**Path Parameters:**\n- `category`: Configuration category name\n\n**Response:** List of ConfigurationItemResponse"
+              }
+            },
+            {
+              "name": "Get Configuration Value",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/config/LogRetentionDays",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "config", "LogRetentionDays"]
+                },
+                "description": "Get a specific configuration value.\n\n**Path Parameters:**\n- `key`: Configuration key name\n\n**Response:** { Key, Value }"
+              }
+            },
+            {
+              "name": "Set Configuration Value",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"value\": \"90\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/config/LogRetentionDays",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "config", "LogRetentionDays"]
+                },
+                "description": "Set a configuration value.\n\n**Request Body:**\n- `value` (required): New value as string\n\n**Response:** 204 No Content"
+              }
+            },
+            {
+              "name": "Create Configuration",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"key\": \"CustomSetting\",\n  \"value\": \"CustomValue\",\n  \"category\": \"Custom\",\n  \"description\": \"A custom configuration setting\",\n  \"isEncrypted\": false\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/config",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "config"]
+                },
+                "description": "Create a new configuration item.\n\n**Request Body:**\n- `key` (required): Unique key name\n- `value` (required): Configuration value\n- `category` (optional): Category name\n- `description` (optional): Description\n- `isEncrypted` (optional): Encrypt the value\n\n**Response:** ConfigurationItemResponse"
+              }
+            },
+            {
+              "name": "Get Configuration Categories",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/config/categories",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "config", "categories"]
+                },
+                "description": "Get all configuration categories.\n\n**Response:** List of category strings"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Audit Log",
+          "item": [
+            {
+              "name": "Search Audit Logs",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/audit?page=1&pageSize=50",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "audit"],
+                  "query": [
+                    {
+                      "key": "userId",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "action",
+                      "value": "Login",
+                      "disabled": true
+                    },
+                    {
+                      "key": "entityType",
+                      "value": "User",
+                      "disabled": true
+                    },
+                    {
+                      "key": "entityId",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "startDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "endDate",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "50"
+                    }
+                  ]
+                },
+                "description": "Search audit logs with filtering (Admin only).\n\n**Query Parameters:**\n- `userId` (optional): Filter by user\n- `action` (optional): Filter by action type\n- `entityType` (optional): Filter by entity type\n- `entityId` (optional): Filter by entity ID\n- `startDate`, `endDate`: Date range\n- `page`, `pageSize`: Pagination\n\n**Response:** PaginatedResult<AuditLogResponse>"
+              }
+            },
+            {
+              "name": "Get Audit Logs by User",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/audit/by-user/{{userId}}?count=100",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "audit", "by-user", "{{userId}}"],
+                  "query": [
+                    {
+                      "key": "count",
+                      "value": "100"
+                    }
+                  ]
+                },
+                "description": "Get audit logs for a specific user.\n\n**Query Parameters:**\n- `count` (optional): 1-500, default 100\n\n**Response:** List of AuditLogResponse"
+              }
+            },
+            {
+              "name": "Get Audit Logs by Entity",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/audit/by-entity/Job/{{jobId}}?count=100",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "audit", "by-entity", "Job", "{{jobId}}"],
+                  "query": [
+                    {
+                      "key": "count",
+                      "value": "100"
+                    }
+                  ]
+                },
+                "description": "Get audit logs for a specific entity.\n\n**Path Parameters:**\n- `entityType`: User, Job, Server, Alert, etc.\n- `entityId`: Entity identifier\n\n**Response:** List of AuditLogResponse"
+              }
+            },
+            {
+              "name": "Get Recent Audit Logs",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/audit/recent?count=100",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "audit", "recent"],
+                  "query": [
+                    {
+                      "key": "count",
+                      "value": "100"
+                    }
+                  ]
+                },
+                "description": "Get most recent audit logs.\n\n**Response:** List of AuditLogResponse"
+              }
+            },
+            {
+              "name": "Get Login Audit Logs",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/audit/logins?count=100",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "audit", "logins"],
+                  "query": [
+                    {
+                      "key": "userId",
+                      "value": "",
+                      "disabled": true
+                    },
+                    {
+                      "key": "count",
+                      "value": "100"
+                    }
+                  ]
+                },
+                "description": "Get login/logout audit logs.\n\n**Query Parameters:**\n- `userId` (optional): Filter by user\n- `count` (optional): 1-500, default 100\n\n**Response:** List of AuditLogResponse"
+              }
+            },
+            {
+              "name": "Get Audit Actions",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/audit/actions",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "audit", "actions"]
+                },
+                "description": "Get all distinct audit action types.\n\n**Response:** List of action strings"
+              }
+            },
+            {
+              "name": "Get Audit Entity Types",
+              "request": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/audit/entity-types",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "audit", "entity-types"]
+                },
+                "description": "Get all distinct audit entity types.\n\n**Response:** List of entity type strings"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Maintenance",
+          "item": [
+            {
+              "name": "Cleanup Logs",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/maintenance/cleanup/logs?retentionDays=90",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "maintenance", "cleanup", "logs"],
+                  "query": [
+                    {
+                      "key": "retentionDays",
+                      "value": "90"
+                    }
+                  ]
+                },
+                "description": "Cleanup old log entries (Admin only).\n\n**Query Parameters:**\n- `retentionDays` (optional): Keep logs newer than this (default: 90)\n\n**Response:** MaintenanceResult with deleted count"
+              }
+            },
+            {
+              "name": "Cleanup Executions",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/maintenance/cleanup/executions?retentionDays=365&keepMinimumPerJob=100",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "maintenance", "cleanup", "executions"],
+                  "query": [
+                    {
+                      "key": "retentionDays",
+                      "value": "365"
+                    },
+                    {
+                      "key": "keepMinimumPerJob",
+                      "value": "100"
+                    }
+                  ]
+                },
+                "description": "Cleanup old execution records.\n\n**Query Parameters:**\n- `retentionDays` (optional): Default 365\n- `keepMinimumPerJob` (optional): Minimum records to keep per job (default: 100)\n\n**Response:** MaintenanceResult"
+              }
+            },
+            {
+              "name": "Cleanup Alerts",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/maintenance/cleanup/alerts?retentionDays=180",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "maintenance", "cleanup", "alerts"],
+                  "query": [
+                    {
+                      "key": "retentionDays",
+                      "value": "180"
+                    }
+                  ]
+                },
+                "description": "Cleanup old resolved alert instances.\n\n**Query Parameters:**\n- `retentionDays` (optional): Default 180\n\n**Response:** MaintenanceResult"
+              }
+            },
+            {
+              "name": "Cleanup Audit Logs",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/maintenance/cleanup/audit?retentionDays=365",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "maintenance", "cleanup", "audit"],
+                  "query": [
+                    {
+                      "key": "retentionDays",
+                      "value": "365"
+                    }
+                  ]
+                },
+                "description": "Cleanup old audit logs.\n\n**Query Parameters:**\n- `retentionDays` (optional): Default 365\n\n**Response:** MaintenanceResult"
+              }
+            },
+            {
+              "name": "Cleanup Expired Tokens",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/maintenance/cleanup/tokens",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "maintenance", "cleanup", "tokens"]
+                },
+                "description": "Cleanup expired refresh tokens.\n\n**Response:** MaintenanceResult with cleaned count"
+              }
+            },
+            {
+              "name": "Health Check Servers",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/maintenance/health-check/servers",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "maintenance", "health-check", "servers"]
+                },
+                "description": "Run health check on all servers and update statuses.\n\n**Response:** MaintenanceResult"
+              }
+            },
+            {
+              "name": "Health Check Executions",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/maintenance/health-check/executions",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "maintenance", "health-check", "executions"]
+                },
+                "description": "Check for stuck/orphaned executions and mark as failed.\n\n**Response:** MaintenanceResult"
+              }
+            },
+            {
+              "name": "Run All Maintenance Tasks",
+              "request": {
+                "method": "POST",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/maintenance/run-all",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "maintenance", "run-all"]
+                },
+                "description": "Run all maintenance tasks at once.\n\n**Response:** List of MaintenanceResult for each task"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Health Check",
+          "item": [
+            {
+              "name": "System Health",
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "url": {
+                  "raw": "{{baseUrl}}/api/{{apiVersion}}/system/health",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "{{apiVersion}}", "system", "health"]
+                },
+                "description": "Get system health status (no authentication required).\n\n**Response:** HealthCheckResponse with:\n- `status`: \"Healthy\"\n- `timestamp`: Current UTC time\n- `version`: Application version"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>FMSLogNexus.Client</RootNamespace>
+    <AssemblyName>FMSLogNexus.Client</AssemblyName>
+    <Version>1.0.0</Version>
+    <Authors>FMS Log Nexus Team</Authors>
+    <Company>Your Organization</Company>
+    <Product>FMS Log Nexus Client SDK</Product>
+    <Description>Client SDK for integrating with FMS Log Nexus centralized logging system</Description>
+    <PackageId>FMSLogNexus.Client</PackageId>
+    <PackageTags>logging;monitoring;fms;client;sdk</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/your-org/fms-log-nexus</RepositoryUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+</Project>

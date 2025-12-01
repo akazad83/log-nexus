@@ -1,0 +1,2182 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>FMSLogNexus.Api</name>
+    </assembly>
+    <members>
+        <member name="T:FMSLogNexus.Api.Authentication.ApiKeyAuthenticationHandler">
+            <summary>
+            Authentication handler for API key authentication.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Authentication.ApiKeyAuthenticationOptions">
+            <summary>
+            Options for API key authentication.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Authentication.ApiKeyAuthenticationExtensions">
+            <summary>
+            Extension methods for API key authentication.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.BackgroundServices.AlertEvaluationService">
+            <summary>
+            Background service that periodically evaluates alert rules
+            and triggers alerts based on configured conditions.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.BackgroundServices.BackgroundServiceExtensions">
+            <summary>
+            Extension methods for registering background services.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.BackgroundServices.BackgroundServiceExtensions.AddBackgroundServices(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Adds all background services to the service collection.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.BackgroundServices.BackgroundServiceExtensions.AddBackgroundServices(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{FMSLogNexus.Api.BackgroundServices.BackgroundServiceOptions})">
+            <summary>
+            Adds background services with custom configuration.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.BackgroundServices.BackgroundServiceOptionsValidator">
+            <summary>
+            Validator for background service options.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.BackgroundServices.BackgroundServicesHealthCheck">
+            <summary>
+            Health check for background services.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.BackgroundServices.BaseBackgroundService">
+            <summary>
+            Base class for background services with common functionality.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.BackgroundServices.BaseBackgroundService.Interval">
+            <summary>
+            Gets the interval between executions.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.BackgroundServices.BaseBackgroundService.RunOnStartup">
+            <summary>
+            Gets whether the service should run immediately on startup.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.BackgroundServices.BaseBackgroundService.InitialDelay">
+            <summary>
+            Gets the initial delay before first execution.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.BackgroundServices.BaseBackgroundService.ExecuteTaskAsync(System.Threading.CancellationToken)">
+            <summary>
+            Executes the background task.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.BackgroundServices.BaseBackgroundService.CreateScope">
+            <summary>
+            Creates a new service scope for dependency resolution.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.BackgroundServices.BaseBackgroundService.GetService``1(Microsoft.Extensions.DependencyInjection.IServiceScope)">
+            <summary>
+            Gets a service from a scope.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.BackgroundServices.BackgroundServiceOptions">
+            <summary>
+            Configuration options for background services.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.BackgroundServices.BackgroundServiceOptions.DashboardUpdateIntervalSeconds">
+            <summary>
+            Dashboard update interval in seconds.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.BackgroundServices.BackgroundServiceOptions.ServerHealthCheckIntervalSeconds">
+            <summary>
+            Server health check interval in seconds.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.BackgroundServices.BackgroundServiceOptions.ExecutionTimeoutCheckIntervalSeconds">
+            <summary>
+            Execution timeout check interval in seconds.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.BackgroundServices.BackgroundServiceOptions.AlertEvaluationIntervalSeconds">
+            <summary>
+            Alert evaluation interval in seconds.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.BackgroundServices.BackgroundServiceOptions.LogStatisticsIntervalSeconds">
+            <summary>
+            Log statistics aggregation interval in seconds.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.BackgroundServices.BackgroundServiceOptions.MaintenanceIntervalHours">
+            <summary>
+            Maintenance task interval in hours.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.BackgroundServices.BackgroundServiceOptions.ServerTimeoutThresholdSeconds">
+            <summary>
+            Server timeout threshold in seconds.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.BackgroundServices.BackgroundServiceOptions.Enabled">
+            <summary>
+            Whether to enable all background services.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.BackgroundServices.DashboardUpdateService">
+            <summary>
+            Background service that periodically updates dashboard statistics
+            and broadcasts them to connected clients via SignalR.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.BackgroundServices.ExecutionTimeoutService">
+            <summary>
+            Background service that monitors running executions and marks them as timed out
+            when they exceed their job's timeout threshold.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.BackgroundServices.JobHealthMonitorService">
+            <summary>
+            Background service that monitors job health scores
+            and broadcasts updates when health changes significantly.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.BackgroundServices.LogStatisticsService">
+            <summary>
+            Background service that periodically aggregates log statistics
+            and broadcasts them to connected clients.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.BackgroundServices.MaintenanceService">
+            <summary>
+            Background service that performs periodic maintenance tasks
+            including log cleanup, token cleanup, and data archival.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.BackgroundServices.ServerHealthCheckService">
+            <summary>
+            Background service that monitors server health by checking heartbeat timestamps
+            and marking servers as offline when they exceed the timeout threshold.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Controllers.AlertsController">
+            <summary>
+            Controller for alert operations.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.CreateAlert(FMSLogNexus.Core.DTOs.Requests.CreateAlertRequest,System.Threading.CancellationToken)">
+            <summary>
+            Creates a new alert rule.
+            </summary>
+            <param name="request">Alert creation request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Created alert.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.GetAlert(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets an alert by ID.
+            </summary>
+            <param name="alertId">Alert ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Alert.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.GetAlertDetail(System.Guid,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets detailed alert information with recent instances.
+            </summary>
+            <param name="alertId">Alert ID.</param>
+            <param name="recentInstanceCount">Number of recent instances to include.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Detailed alert information.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.UpdateAlert(System.Guid,FMSLogNexus.Core.DTOs.Requests.UpdateAlertRequest,System.Threading.CancellationToken)">
+            <summary>
+            Updates an alert.
+            </summary>
+            <param name="alertId">Alert ID.</param>
+            <param name="request">Update request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Updated alert.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.DeleteAlert(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Deletes (deactivates) an alert.
+            </summary>
+            <param name="alertId">Alert ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.GetAllAlerts(System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Gets all alerts.
+            </summary>
+            <param name="activeOnly">Include only active alerts.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Alerts.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.GetAlertsByType(FMSLogNexus.Core.Enums.AlertType,System.Threading.CancellationToken)">
+            <summary>
+            Gets alerts by type.
+            </summary>
+            <param name="alertType">Alert type.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Alerts of the specified type.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.GetAlertsByJob(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets alerts for a job.
+            </summary>
+            <param name="jobId">Job ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Alerts for the job.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.ActivateAlert(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Activates an alert.
+            </summary>
+            <param name="alertId">Alert ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.DeactivateAlert(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Deactivates an alert.
+            </summary>
+            <param name="alertId">Alert ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.SearchInstances(FMSLogNexus.Core.DTOs.Requests.AlertInstanceSearchRequest,System.Threading.CancellationToken)">
+            <summary>
+            Searches alert instances.
+            </summary>
+            <param name="request">Search request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Paginated alert instances.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.GetActiveInstances(System.Threading.CancellationToken)">
+            <summary>
+            Gets active (unresolved) alert instances.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Active alert instances.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.GetUnacknowledged(System.Threading.CancellationToken)">
+            <summary>
+            Gets unacknowledged alert instances.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Unacknowledged alert instances.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.GetInstance(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets an alert instance by ID.
+            </summary>
+            <param name="instanceId">Instance ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Alert instance.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.AcknowledgeInstance(System.Guid,FMSLogNexus.Core.DTOs.Requests.AcknowledgeAlertRequest,System.Threading.CancellationToken)">
+            <summary>
+            Acknowledges an alert instance.
+            </summary>
+            <param name="instanceId">Instance ID.</param>
+            <param name="request">Acknowledgement request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.ResolveInstance(System.Guid,FMSLogNexus.Core.DTOs.Requests.ResolveAlertRequest,System.Threading.CancellationToken)">
+            <summary>
+            Resolves an alert instance.
+            </summary>
+            <param name="instanceId">Instance ID.</param>
+            <param name="request">Resolution request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.BulkAcknowledge(FMSLogNexus.Api.Controllers.BulkAlertActionRequest,System.Threading.CancellationToken)">
+            <summary>
+            Bulk acknowledges alert instances.
+            </summary>
+            <param name="request">Bulk acknowledge request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Number of instances acknowledged.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.BulkResolve(FMSLogNexus.Api.Controllers.BulkAlertActionRequest,System.Threading.CancellationToken)">
+            <summary>
+            Bulk resolves alert instances.
+            </summary>
+            <param name="request">Bulk resolve request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Number of instances resolved.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.GetInstanceSummary(System.Threading.CancellationToken)">
+            <summary>
+            Gets alert instance summary.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Instance summary.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AlertsController.TriggerAlert(FMSLogNexus.Api.Controllers.TriggerAlertRequest,System.Threading.CancellationToken)">
+            <summary>
+            Manually triggers an alert (for testing).
+            </summary>
+            <param name="request">Trigger request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Created instance or null if throttled.</returns>
+        </member>
+        <member name="T:FMSLogNexus.Api.Controllers.BulkAlertActionRequest">
+            <summary>
+            Bulk alert action request.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Controllers.TriggerAlertRequest">
+            <summary>
+            Manual trigger alert request.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Controllers.ApiControllerBase">
+            <summary>
+            Base controller providing common functionality for all API controllers.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.Controllers.ApiControllerBase.CurrentUserId">
+            <summary>
+            Gets the current user's ID from claims.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.Controllers.ApiControllerBase.CurrentUsername">
+            <summary>
+            Gets the current user's username from claims.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.Controllers.ApiControllerBase.CurrentRole">
+            <summary>
+            Gets the current user's role from claims.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.Controllers.ApiControllerBase.ClientIpAddress">
+            <summary>
+            Gets the client IP address.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.Controllers.ApiControllerBase.ClientUserAgent">
+            <summary>
+            Gets the client user agent.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ApiControllerBase.NotFoundResponse(System.String,System.Object)">
+            <summary>
+            Returns a standardized not found response.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ApiControllerBase.BadRequestResponse(System.String)">
+            <summary>
+            Returns a standardized bad request response.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ApiControllerBase.ConflictResponse(System.String)">
+            <summary>
+            Returns a standardized conflict response.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ApiControllerBase.ForbiddenResponse(System.String)">
+            <summary>
+            Returns a standardized forbidden response.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ApiControllerBase.UnauthorizedResponse(System.String)">
+            <summary>
+            Returns a standardized unauthorized response.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ApiControllerBase.HasRole(FMSLogNexus.Core.Enums.UserRole[])">
+            <summary>
+            Checks if the current user has the required role.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.Controllers.ApiControllerBase.IsAdmin">
+            <summary>
+            Checks if the current user is an admin.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ApiControllerBase.CanManageUser(System.Guid)">
+            <summary>
+            Checks if the current user can manage the specified user.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Controllers.ApiResponse`1">
+            <summary>
+            Standard API response wrapper.
+            </summary>
+            <typeparam name="T">Data type.</typeparam>
+        </member>
+        <member name="T:FMSLogNexus.Api.Controllers.ApiResponse">
+            <summary>
+            Standard API response without data.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Controllers.AuthController">
+            <summary>
+            Controller for authentication operations.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AuthController.Login(FMSLogNexus.Core.DTOs.Requests.LoginRequest,System.Threading.CancellationToken)">
+            <summary>
+            Authenticates a user and returns JWT tokens.
+            </summary>
+            <param name="request">Login request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Login response with tokens.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AuthController.RefreshToken(FMSLogNexus.Core.DTOs.Requests.RefreshTokenRequest,System.Threading.CancellationToken)">
+            <summary>
+            Refreshes an access token using a refresh token.
+            </summary>
+            <param name="request">Refresh token request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>New tokens.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AuthController.Logout(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Logs out by revoking the refresh token.
+            </summary>
+            <param name="refreshToken">Refresh token to revoke.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AuthController.LogoutAllSessions(System.Threading.CancellationToken)">
+            <summary>
+            Logs out from all sessions.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AuthController.ChangePassword(FMSLogNexus.Core.DTOs.Requests.ChangePasswordRequest,System.Threading.CancellationToken)">
+            <summary>
+            Changes the current user's password.
+            </summary>
+            <param name="request">Change password request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AuthController.GetCurrentUser(System.Threading.CancellationToken)">
+            <summary>
+            Gets the current authenticated user.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Current user information.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.AuthController.ValidateToken(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Validates a JWT access token.
+            </summary>
+            <param name="token">Token to validate.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Token validation result.</returns>
+        </member>
+        <member name="T:FMSLogNexus.Api.Controllers.DashboardController">
+            <summary>
+            Controller for dashboard operations.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.DashboardController.GetSummary(System.Threading.CancellationToken)">
+            <summary>
+            Gets the dashboard summary with aggregated statistics.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Dashboard summary.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.DashboardController.GetLogTrend(System.Int32,FMSLogNexus.Core.Enums.TrendInterval,System.Threading.CancellationToken)">
+            <summary>
+            Gets log volume trend data.
+            </summary>
+            <param name="hours">Number of hours to look back.</param>
+            <param name="interval">Aggregation interval.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Log trend data.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.DashboardController.GetRecentErrors(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets recent error logs.
+            </summary>
+            <param name="count">Number of errors to return.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Recent errors.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.DashboardController.GetRecentFailures(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets recent job failures.
+            </summary>
+            <param name="count">Number of failures to return.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Recent failures.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.DashboardController.GetJobHealthOverview(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets job health overview.
+            </summary>
+            <param name="count">Number of jobs to return.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Job health data.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.DashboardController.GetActiveAlerts(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets active alerts.
+            </summary>
+            <param name="count">Number of alerts to return.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Active alerts.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.DashboardController.GetRunningJobs(System.Threading.CancellationToken)">
+            <summary>
+            Gets currently running jobs.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Running jobs.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.DashboardController.GetServerStatuses(System.Threading.CancellationToken)">
+            <summary>
+            Gets server statuses.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Server statuses.</returns>
+        </member>
+        <member name="T:FMSLogNexus.Api.Controllers.ExecutionsController">
+            <summary>
+            Controller for job execution operations.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ExecutionsController.StartExecution(FMSLogNexus.Core.DTOs.Requests.StartExecutionRequest,System.Threading.CancellationToken)">
+            <summary>
+            Starts a new job execution.
+            </summary>
+            <param name="request">Start execution request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Started execution.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ExecutionsController.CompleteExecution(System.Guid,FMSLogNexus.Core.DTOs.Requests.CompleteExecutionRequest,System.Threading.CancellationToken)">
+            <summary>
+            Completes an execution.
+            </summary>
+            <param name="executionId">Execution ID.</param>
+            <param name="request">Completion request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Completed execution.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ExecutionsController.CancelExecution(System.Guid,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Cancels an execution.
+            </summary>
+            <param name="executionId">Execution ID.</param>
+            <param name="reason">Cancellation reason.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Cancelled execution.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ExecutionsController.GetExecution(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets an execution by ID.
+            </summary>
+            <param name="executionId">Execution ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Execution.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ExecutionsController.GetExecutionDetail(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets detailed execution information.
+            </summary>
+            <param name="executionId">Execution ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Detailed execution.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ExecutionsController.SearchExecutions(FMSLogNexus.Core.DTOs.Requests.ExecutionSearchRequest,System.Threading.CancellationToken)">
+            <summary>
+            Searches executions with filtering and pagination.
+            </summary>
+            <param name="request">Search request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Paginated executions.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ExecutionsController.GetByJob(System.String,System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets executions for a job.
+            </summary>
+            <param name="jobId">Job ID.</param>
+            <param name="startDate">Start date filter.</param>
+            <param name="endDate">End date filter.</param>
+            <param name="page">Page number.</param>
+            <param name="pageSize">Page size.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Paginated executions.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ExecutionsController.GetRecentByJob(System.String,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets recent executions for a job.
+            </summary>
+            <param name="jobId">Job ID.</param>
+            <param name="count">Number of executions.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Recent executions.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ExecutionsController.GetLastByJob(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets the last execution for a job.
+            </summary>
+            <param name="jobId">Job ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Last execution or not found.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ExecutionsController.GetRunning(System.Threading.CancellationToken)">
+            <summary>
+            Gets all running executions.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Running executions.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ExecutionsController.GetRunningByServer(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets running executions for a server.
+            </summary>
+            <param name="serverName">Server name.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Running executions on the server.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ExecutionsController.IsJobRunning(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Checks if a job is running.
+            </summary>
+            <param name="jobId">Job ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>True if running.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ExecutionsController.GetOverdue(System.Threading.CancellationToken)">
+            <summary>
+            Gets overdue executions.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Overdue executions.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ExecutionsController.GetRecentFailures(System.Int32,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets recent failed executions.
+            </summary>
+            <param name="count">Number of failures.</param>
+            <param name="serverName">Optional server filter.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Recent failures.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ExecutionsController.GetConsecutiveFailureCount(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets consecutive failure count for a job.
+            </summary>
+            <param name="jobId">Job ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Consecutive failure count.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ExecutionsController.GetStatistics(System.String,System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.Threading.CancellationToken)">
+            <summary>
+            Gets execution statistics for a job.
+            </summary>
+            <param name="jobId">Job ID.</param>
+            <param name="startDate">Start date.</param>
+            <param name="endDate">End date.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Execution statistics.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ExecutionsController.GetTrend(System.Nullable{System.DateTime},System.Nullable{System.DateTime},FMSLogNexus.Core.Enums.TrendInterval,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets execution trend data.
+            </summary>
+            <param name="startDate">Start date.</param>
+            <param name="endDate">End date.</param>
+            <param name="interval">Aggregation interval.</param>
+            <param name="jobId">Optional job filter.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Trend data.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ExecutionsController.GetCountsByStatus(System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets execution counts by status.
+            </summary>
+            <param name="startDate">Start date.</param>
+            <param name="endDate">End date.</param>
+            <param name="jobId">Optional job filter.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Counts by status.</returns>
+        </member>
+        <member name="T:FMSLogNexus.Api.Controllers.JobsController">
+            <summary>
+            Controller for job operations.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.JobsController.CreateJob(FMSLogNexus.Core.DTOs.Requests.CreateJobRequest,System.Threading.CancellationToken)">
+            <summary>
+            Creates a new job.
+            </summary>
+            <param name="request">Job creation request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Created job.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.JobsController.GetJob(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets a job by ID.
+            </summary>
+            <param name="jobId">Job ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Job.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.JobsController.GetJobDetail(System.String,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets detailed job information with recent executions.
+            </summary>
+            <param name="jobId">Job ID.</param>
+            <param name="recentExecutionCount">Number of recent executions to include.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Detailed job information.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.JobsController.UpdateJob(System.String,FMSLogNexus.Core.DTOs.Requests.UpdateJobRequest,System.Threading.CancellationToken)">
+            <summary>
+            Updates a job.
+            </summary>
+            <param name="jobId">Job ID.</param>
+            <param name="request">Update request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Updated job.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.JobsController.DeleteJob(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Deletes (deactivates) a job.
+            </summary>
+            <param name="jobId">Job ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.JobsController.SearchJobs(FMSLogNexus.Core.DTOs.Requests.JobSearchRequest,System.Threading.CancellationToken)">
+            <summary>
+            Searches jobs with filtering and pagination.
+            </summary>
+            <param name="request">Search request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Paginated jobs.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.JobsController.RegisterJob(FMSLogNexus.Core.DTOs.Requests.RegisterJobRequest,System.Threading.CancellationToken)">
+            <summary>
+            Registers or updates a job (used by agents).
+            </summary>
+            <param name="request">Registration request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Registered job.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.JobsController.ActivateJob(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Activates a job.
+            </summary>
+            <param name="jobId">Job ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.JobsController.DeactivateJob(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Deactivates a job.
+            </summary>
+            <param name="jobId">Job ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.JobsController.GetByServer(System.String,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Gets jobs by server.
+            </summary>
+            <param name="serverName">Server name.</param>
+            <param name="activeOnly">Include only active jobs.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Jobs on the server.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.JobsController.GetByCategory(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets jobs by category.
+            </summary>
+            <param name="category">Category.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Jobs in the category.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.JobsController.GetCriticalJobs(System.Threading.CancellationToken)">
+            <summary>
+            Gets critical jobs.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Critical jobs.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.JobsController.GetFailedJobs(System.Threading.CancellationToken)">
+            <summary>
+            Gets failed jobs (last run failed).
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Failed jobs.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.JobsController.GetJobHealth(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets health information for a job.
+            </summary>
+            <param name="jobId">Job ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Job health information.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.JobsController.GetAllJobHealth(System.Threading.CancellationToken)">
+            <summary>
+            Gets health overview for all jobs.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>All job health information.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.JobsController.GetStatisticsSummary(System.Threading.CancellationToken)">
+            <summary>
+            Gets job statistics summary.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Statistics summary.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.JobsController.GetDistinctCategories(System.Threading.CancellationToken)">
+            <summary>
+            Gets distinct job categories.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Categories.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.JobsController.GetDistinctTags(System.Threading.CancellationToken)">
+            <summary>
+            Gets distinct job tags.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Tags.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.JobsController.GetLookupItems(System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Gets job lookup items for dropdowns.
+            </summary>
+            <param name="activeOnly">Include only active jobs.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Lookup items.</returns>
+        </member>
+        <member name="T:FMSLogNexus.Api.Controllers.LogsController">
+            <summary>
+            Controller for log operations.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.LogsController.CreateLog(FMSLogNexus.Core.DTOs.Requests.CreateLogRequest,System.Threading.CancellationToken)">
+            <summary>
+            Creates a single log entry.
+            </summary>
+            <param name="request">Log creation request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Log ingestion result.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.LogsController.CreateBatch(FMSLogNexus.Core.DTOs.Requests.BatchLogRequest,System.Threading.CancellationToken)">
+            <summary>
+            Creates multiple log entries in a batch.
+            </summary>
+            <param name="request">Batch log request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Batch result.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.LogsController.GetLog(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets a log entry by ID.
+            </summary>
+            <param name="id">Log entry ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Log entry.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.LogsController.GetLogDetail(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets detailed log entry with related logs.
+            </summary>
+            <param name="id">Log entry ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Detailed log entry.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.LogsController.SearchLogs(FMSLogNexus.Core.DTOs.Requests.LogSearchRequest,System.Threading.CancellationToken)">
+            <summary>
+            Searches logs with filtering and pagination.
+            </summary>
+            <param name="request">Search request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Paginated log entries.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.LogsController.GetByCorrelationId(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets logs by correlation ID.
+            </summary>
+            <param name="correlationId">Correlation ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Related log entries.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.LogsController.GetByTraceId(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets logs by trace ID.
+            </summary>
+            <param name="traceId">Trace ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Related log entries.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.LogsController.GetByJobExecution(System.Guid,System.Nullable{FMSLogNexus.Core.Enums.LogLevel},System.Threading.CancellationToken)">
+            <summary>
+            Gets logs for a job execution.
+            </summary>
+            <param name="executionId">Job execution ID.</param>
+            <param name="minLevel">Minimum log level.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Log entries for the execution.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.LogsController.GetRecentErrors(System.Int32,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets recent error logs.
+            </summary>
+            <param name="count">Number of errors to return.</param>
+            <param name="serverName">Optional server filter.</param>
+            <param name="jobId">Optional job filter.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Recent error logs.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.LogsController.GetStatistics(FMSLogNexus.Core.DTOs.Requests.LogStatisticsRequest,System.Threading.CancellationToken)">
+            <summary>
+            Gets log statistics for a time range.
+            </summary>
+            <param name="request">Statistics request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Log statistics.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.LogsController.GetTrend(System.Nullable{System.DateTime},System.Nullable{System.DateTime},FMSLogNexus.Core.Enums.TrendInterval,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets log volume trend data.
+            </summary>
+            <param name="startDate">Start date.</param>
+            <param name="endDate">End date.</param>
+            <param name="interval">Aggregation interval.</param>
+            <param name="serverName">Optional server filter.</param>
+            <param name="jobId">Optional job filter.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Trend data points.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.LogsController.GetCountsByLevel(System.Nullable{System.DateTime},System.Nullable{System.DateTime},System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets log counts by level.
+            </summary>
+            <param name="startDate">Start date.</param>
+            <param name="endDate">End date.</param>
+            <param name="serverName">Optional server filter.</param>
+            <param name="jobId">Optional job filter.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Counts by level.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.LogsController.GetDistinctServers(System.Threading.CancellationToken)">
+            <summary>
+            Gets distinct server names from logs.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Server names.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.LogsController.GetDistinctJobs(System.Threading.CancellationToken)">
+            <summary>
+            Gets distinct job IDs from logs.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Job IDs.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.LogsController.GetDistinctCategories(System.Threading.CancellationToken)">
+            <summary>
+            Gets distinct categories from logs.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Categories.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.LogsController.GetDistinctTags(System.Threading.CancellationToken)">
+            <summary>
+            Gets distinct tags from logs.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Tags.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.LogsController.ExportLogs(FMSLogNexus.Core.DTOs.Requests.LogExportRequest,System.Threading.CancellationToken)">
+            <summary>
+            Exports logs matching the filter as CSV.
+            </summary>
+            <param name="request">Export request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>CSV file.</returns>
+        </member>
+        <member name="T:FMSLogNexus.Api.Controllers.ServersController">
+            <summary>
+            Controller for server operations.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ServersController.CreateServer(FMSLogNexus.Core.DTOs.Requests.CreateServerRequest,System.Threading.CancellationToken)">
+            <summary>
+            Creates a new server.
+            </summary>
+            <param name="request">Server creation request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Created server.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ServersController.GetServer(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets a server by name.
+            </summary>
+            <param name="serverName">Server name.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Server.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ServersController.GetServerDetail(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets detailed server information.
+            </summary>
+            <param name="serverName">Server name.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Detailed server information.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ServersController.UpdateServer(System.String,FMSLogNexus.Core.DTOs.Requests.UpdateServerRequest,System.Threading.CancellationToken)">
+            <summary>
+            Updates a server.
+            </summary>
+            <param name="serverName">Server name.</param>
+            <param name="request">Update request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Updated server.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ServersController.DeleteServer(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Deletes (deactivates) a server.
+            </summary>
+            <param name="serverName">Server name.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ServersController.GetAllServers(System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Gets all servers.
+            </summary>
+            <param name="activeOnly">Include only active servers.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Servers.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ServersController.GetByStatus(FMSLogNexus.Core.Enums.ServerStatus,System.Threading.CancellationToken)">
+            <summary>
+            Gets servers by status.
+            </summary>
+            <param name="status">Server status.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Servers with the status.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ServersController.ProcessHeartbeat(FMSLogNexus.Core.DTOs.Requests.ServerHeartbeatRequest,System.Threading.CancellationToken)">
+            <summary>
+            Processes a heartbeat from a server agent.
+            </summary>
+            <param name="request">Heartbeat request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Server state.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ServersController.GetUnresponsive(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets unresponsive servers.
+            </summary>
+            <param name="timeoutSeconds">Timeout in seconds.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Unresponsive servers.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ServersController.ActivateServer(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Activates a server.
+            </summary>
+            <param name="serverName">Server name.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ServersController.DeactivateServer(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Deactivates a server.
+            </summary>
+            <param name="serverName">Server name.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ServersController.SetMaintenanceMode(System.String,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Sets server maintenance mode.
+            </summary>
+            <param name="serverName">Server name.</param>
+            <param name="inMaintenance">Maintenance mode flag.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ServersController.GetStatusSummary(System.Threading.CancellationToken)">
+            <summary>
+            Gets server status summary.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Status summary.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.ServersController.GetLookupItems(System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Gets server lookup items for dropdowns.
+            </summary>
+            <param name="activeOnly">Include only active servers.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Lookup items.</returns>
+        </member>
+        <member name="T:FMSLogNexus.Api.Controllers.SystemController">
+            <summary>
+            Controller for system operations.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.GetAllConfiguration(System.Threading.CancellationToken)">
+            <summary>
+            Gets all configuration items.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>All configuration items.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.GetConfigurationByCategory(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets configuration items by category.
+            </summary>
+            <param name="category">Category name.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Configuration items in the category.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.GetConfigurationValue(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets a configuration value.
+            </summary>
+            <param name="key">Configuration key.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Configuration value.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.SetConfigurationValue(System.String,FMSLogNexus.Api.Controllers.SetConfigValueRequest,System.Threading.CancellationToken)">
+            <summary>
+            Sets a configuration value.
+            </summary>
+            <param name="key">Configuration key.</param>
+            <param name="request">Set value request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.CreateOrUpdateConfiguration(FMSLogNexus.Core.DTOs.Requests.CreateConfigurationRequest,System.Threading.CancellationToken)">
+            <summary>
+            Creates or updates a configuration item.
+            </summary>
+            <param name="request">Configuration request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Configuration item.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.GetConfigurationCategories(System.Threading.CancellationToken)">
+            <summary>
+            Gets distinct configuration categories.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Categories.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.SearchAuditLog(FMSLogNexus.Core.DTOs.Requests.AuditSearchRequest,System.Threading.CancellationToken)">
+            <summary>
+            Searches audit log entries.
+            </summary>
+            <param name="request">Search request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Paginated audit entries.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.GetAuditByUser(System.Guid,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets audit entries for a user.
+            </summary>
+            <param name="userId">User ID.</param>
+            <param name="count">Number of entries.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Audit entries.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.GetAuditByEntity(System.String,System.String,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets audit entries for an entity.
+            </summary>
+            <param name="entityType">Entity type.</param>
+            <param name="entityId">Entity ID.</param>
+            <param name="count">Number of entries.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Audit entries.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.GetRecentAudit(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets recent audit entries.
+            </summary>
+            <param name="count">Number of entries.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Recent audit entries.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.GetLoginHistory(System.Nullable{System.Guid},System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Gets login history.
+            </summary>
+            <param name="userId">Optional user ID filter.</param>
+            <param name="count">Number of entries.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Login history.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.GetAuditActions(System.Threading.CancellationToken)">
+            <summary>
+            Gets distinct audit actions.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Actions.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.GetAuditEntityTypes(System.Threading.CancellationToken)">
+            <summary>
+            Gets distinct audit entity types.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Entity types.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.RunLogCleanup(System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Runs log cleanup.
+            </summary>
+            <param name="retentionDays">Retention days (uses config if not specified).</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Maintenance result.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.RunExecutionCleanup(System.Nullable{System.Int32},System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Runs execution cleanup.
+            </summary>
+            <param name="retentionDays">Retention days (uses config if not specified).</param>
+            <param name="keepMinimumPerJob">Minimum executions to keep per job.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Maintenance result.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.RunAlertCleanup(System.Nullable{System.Int32},System.Threading.CancellationToken)">
+            <summary>
+            Runs alert cleanup.
+            </summary>
+            <param name="retentionDays">Retention days (uses config if not specified).</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Maintenance result.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.RunAuditLogCleanup(System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Runs audit log cleanup.
+            </summary>
+            <param name="retentionDays">Retention days.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Maintenance result.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.RunTokenCleanup(System.Threading.CancellationToken)">
+            <summary>
+            Runs token cleanup.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Maintenance result.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.RunServerHealthCheck(System.Threading.CancellationToken)">
+            <summary>
+            Runs server health check.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Maintenance result.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.RunExecutionTimeoutCheck(System.Threading.CancellationToken)">
+            <summary>
+            Runs execution timeout check.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Maintenance result.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.RunAllMaintenance(System.Threading.CancellationToken)">
+            <summary>
+            Runs all maintenance tasks.
+            </summary>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>All maintenance results.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.SystemController.GetHealth">
+            <summary>
+            Gets system health status.
+            </summary>
+            <returns>Health status.</returns>
+        </member>
+        <member name="T:FMSLogNexus.Api.Controllers.SetConfigValueRequest">
+            <summary>
+            Set configuration value request.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Controllers.HealthCheckResponse">
+            <summary>
+            Health check response.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Controllers.UsersController">
+            <summary>
+            Controller for user management operations.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.UsersController.CreateUser(FMSLogNexus.Core.DTOs.Requests.CreateUserRequest,System.Threading.CancellationToken)">
+            <summary>
+            Creates a new user (admin only).
+            </summary>
+            <param name="request">User creation request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Created user.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.UsersController.GetUser(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets a user by ID.
+            </summary>
+            <param name="userId">User ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>User.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.UsersController.UpdateUser(System.Guid,FMSLogNexus.Core.DTOs.Requests.UpdateUserRequest,System.Threading.CancellationToken)">
+            <summary>
+            Updates a user.
+            </summary>
+            <param name="userId">User ID.</param>
+            <param name="request">Update request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Updated user.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.UsersController.DeleteUser(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Deletes (deactivates) a user (admin only).
+            </summary>
+            <param name="userId">User ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.UsersController.SearchUsers(System.String,System.Nullable{FMSLogNexus.Core.Enums.UserRole},System.Nullable{System.Boolean},System.Int32,System.Int32,System.Threading.CancellationToken)">
+            <summary>
+            Searches users (admin only).
+            </summary>
+            <param name="search">Search text.</param>
+            <param name="role">Role filter.</param>
+            <param name="isActive">Active filter.</param>
+            <param name="page">Page number.</param>
+            <param name="pageSize">Page size.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Paginated users.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.UsersController.ActivateUser(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Activates a user (admin only).
+            </summary>
+            <param name="userId">User ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.UsersController.DeactivateUser(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Deactivates a user (admin only).
+            </summary>
+            <param name="userId">User ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.UsersController.UnlockUser(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Unlocks a user account (admin only).
+            </summary>
+            <param name="userId">User ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.UsersController.ResetPassword(System.Guid,FMSLogNexus.Api.Controllers.ResetPasswordRequest,System.Threading.CancellationToken)">
+            <summary>
+            Resets a user's password (admin only).
+            </summary>
+            <param name="userId">User ID.</param>
+            <param name="request">Reset password request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.UsersController.GetPreferences(System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets user preferences.
+            </summary>
+            <param name="userId">User ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>User preferences.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.UsersController.UpdatePreferences(System.Guid,FMSLogNexus.Core.DTOs.Requests.UpdatePreferencesRequest,System.Threading.CancellationToken)">
+            <summary>
+            Updates user preferences.
+            </summary>
+            <param name="userId">User ID.</param>
+            <param name="request">Update preferences request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Updated preferences.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.UsersController.CreateApiKey(System.Guid,FMSLogNexus.Core.DTOs.Requests.CreateApiKeyRequest,System.Threading.CancellationToken)">
+            <summary>
+            Creates an API key.
+            </summary>
+            <param name="userId">User ID.</param>
+            <param name="request">API key creation request.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Created API key (with full key shown once).</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.UsersController.GetApiKey(System.Guid,System.Guid,System.Threading.CancellationToken)">
+            <summary>
+            Gets an API key by ID.
+            </summary>
+            <param name="userId">User ID.</param>
+            <param name="keyId">API key ID.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>API key (without full key).</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.UsersController.GetUserApiKeys(System.Guid,System.Boolean,System.Threading.CancellationToken)">
+            <summary>
+            Gets all API keys for a user.
+            </summary>
+            <param name="userId">User ID.</param>
+            <param name="includeRevoked">Include revoked keys.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>API keys.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.UsersController.RevokeApiKey(System.Guid,System.Guid,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Revokes an API key.
+            </summary>
+            <param name="userId">User ID.</param>
+            <param name="keyId">API key ID.</param>
+            <param name="reason">Revocation reason.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>No content.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.UsersController.RevokeAllApiKeys(System.Guid,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Revokes all API keys for a user.
+            </summary>
+            <param name="userId">User ID.</param>
+            <param name="reason">Revocation reason.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Number of keys revoked.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.UsersController.CheckUsernameAvailable(System.String,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>
+            Checks if a username is available.
+            </summary>
+            <param name="username">Username to check.</param>
+            <param name="excludeUserId">User ID to exclude.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Availability result.</returns>
+        </member>
+        <member name="M:FMSLogNexus.Api.Controllers.UsersController.CheckEmailAvailable(System.String,System.Nullable{System.Guid},System.Threading.CancellationToken)">
+            <summary>
+            Checks if an email is available.
+            </summary>
+            <param name="email">Email to check.</param>
+            <param name="excludeUserId">User ID to exclude.</param>
+            <param name="cancellationToken">Cancellation token.</param>
+            <returns>Availability result.</returns>
+        </member>
+        <member name="T:FMSLogNexus.Api.Controllers.ResetPasswordRequest">
+            <summary>
+            Reset password request.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.AlertHub">
+            <summary>
+            Hub for real-time alert notifications.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.AlertHub.SubscribeToAllAlerts">
+            <summary>
+            Subscribes to all alert notifications.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.AlertHub.UnsubscribeFromAllAlerts">
+            <summary>
+            Unsubscribes from all alert notifications.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.AlertHub.SubscribeToCriticalAlerts">
+            <summary>
+            Subscribes to critical alerts only.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.AlertHub.UnsubscribeFromCriticalAlerts">
+            <summary>
+            Unsubscribes from critical alerts.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.AlertHub.SubscribeToHighPriorityAlerts">
+            <summary>
+            Subscribes to high priority alerts and above.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.AlertHub.UnsubscribeFromHighPriorityAlerts">
+            <summary>
+            Unsubscribes from high priority alerts.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.AlertHub.SubscribeToJobAlerts(System.String)">
+            <summary>
+            Subscribes to alerts for a specific job.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.AlertHub.UnsubscribeFromJobAlerts(System.String)">
+            <summary>
+            Unsubscribes from alerts for a specific job.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.AlertHub.SubscribeToServerAlerts(System.String)">
+            <summary>
+            Subscribes to alerts for a specific server.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.AlertHub.UnsubscribeFromServerAlerts(System.String)">
+            <summary>
+            Unsubscribes from alerts for a specific server.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.AlertHub.SubscribeToAlertType(FMSLogNexus.Core.Enums.AlertType)">
+            <summary>
+            Subscribes to alerts of a specific type.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.AlertHub.UnsubscribeFromAlertType(FMSLogNexus.Core.Enums.AlertType)">
+            <summary>
+            Unsubscribes from alerts of a specific type.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.AlertHub.SubscribeToSummary">
+            <summary>
+            Subscribes to alert summary updates.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.AlertHub.UnsubscribeFromSummary">
+            <summary>
+            Unsubscribes from alert summary updates.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.IAlertBroadcaster">
+            <summary>
+            Service for broadcasting alert events to connected clients.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.AlertBroadcaster">
+            <summary>
+            Implementation of alert broadcaster using SignalR.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.BaseHub`1">
+            <summary>
+            Base hub providing common functionality for all SignalR hubs.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.Hubs.BaseHub`1.CurrentUserId">
+            <summary>
+            Gets the current user's ID from claims.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.Hubs.BaseHub`1.CurrentUsername">
+            <summary>
+            Gets the current user's username from claims.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.Hubs.BaseHub`1.CurrentRole">
+            <summary>
+            Gets the current user's role from claims.
+            </summary>
+        </member>
+        <member name="P:FMSLogNexus.Api.Hubs.BaseHub`1.ClientIpAddress">
+            <summary>
+            Gets the client IP address.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.BaseHub`1.OnConnectedAsync">
+            <summary>
+            Called when a client connects.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.BaseHub`1.OnDisconnectedAsync(System.Exception)">
+            <summary>
+            Called when a client disconnects.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.BaseHub`1.GetHubName">
+            <summary>
+            Gets the hub name for connection tracking.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.BaseHub`1.JoinGroupAsync(System.String)">
+            <summary>
+            Adds the current connection to a group.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.BaseHub`1.LeaveGroupAsync(System.String)">
+            <summary>
+            Removes the current connection from a group.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.BaseHub`1.OthersInGroup(System.String)">
+            <summary>
+            Sends to all clients in a group except the caller.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.IConnectionManager">
+            <summary>
+            Manages SignalR connections.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.ConnectionManager">
+            <summary>
+            In-memory connection manager implementation.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.DashboardHub">
+            <summary>
+            Hub for real-time dashboard updates and system notifications.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.DashboardHub.SubscribeToDashboard">
+            <summary>
+            Subscribes to dashboard updates.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.DashboardHub.UnsubscribeFromDashboard">
+            <summary>
+            Unsubscribes from dashboard updates.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.DashboardHub.SubscribeToNotifications">
+            <summary>
+            Subscribes to system notifications.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.DashboardHub.UnsubscribeFromNotifications">
+            <summary>
+            Unsubscribes from system notifications.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.DashboardHub.GetConnectionStats">
+            <summary>
+            Gets connection statistics.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.ConnectionStats">
+            <summary>
+            Connection statistics.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.IDashboardBroadcaster">
+            <summary>
+            Service for broadcasting dashboard events to connected clients.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.DashboardBroadcaster">
+            <summary>
+            Implementation of dashboard broadcaster using SignalR.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.ILogHubClient">
+            <summary>
+            Interface for log hub client methods.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.ILogHubClient.ReceiveLog(FMSLogNexus.Api.Hubs.LogNotification)">
+            <summary>
+            Receives a new log entry.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.ILogHubClient.ReceiveLogBatch(System.Collections.Generic.IEnumerable{FMSLogNexus.Api.Hubs.LogNotification})">
+            <summary>
+            Receives a batch of log entries.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.ILogHubClient.ReceiveLogStats(FMSLogNexus.Api.Hubs.LogStatsNotification)">
+            <summary>
+            Receives log statistics update.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.IJobHubClient">
+            <summary>
+            Interface for job hub client methods.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.IJobHubClient.ExecutionStarted(FMSLogNexus.Api.Hubs.ExecutionNotification)">
+            <summary>
+            Receives job execution started notification.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.IJobHubClient.ExecutionCompleted(FMSLogNexus.Api.Hubs.ExecutionNotification)">
+            <summary>
+            Receives job execution completed notification.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.IJobHubClient.ExecutionProgress(FMSLogNexus.Api.Hubs.ExecutionProgressNotification)">
+            <summary>
+            Receives job execution progress update.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.IJobHubClient.JobStatusChanged(FMSLogNexus.Api.Hubs.JobStatusNotification)">
+            <summary>
+            Receives job status change notification.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.IJobHubClient.JobHealthUpdated(FMSLogNexus.Api.Hubs.JobHealthNotification)">
+            <summary>
+            Receives job health update.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.IServerHubClient">
+            <summary>
+            Interface for server hub client methods.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.IServerHubClient.ServerStatusChanged(FMSLogNexus.Api.Hubs.ServerStatusNotification)">
+            <summary>
+            Receives server status change notification.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.IServerHubClient.ServerHeartbeat(FMSLogNexus.Api.Hubs.ServerHeartbeatNotification)">
+            <summary>
+            Receives server heartbeat notification.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.IServerHubClient.ServerMetrics(FMSLogNexus.Api.Hubs.ServerMetricsNotification)">
+            <summary>
+            Receives server metrics update.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.IAlertHubClient">
+            <summary>
+            Interface for alert hub client methods.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.IAlertHubClient.AlertTriggered(FMSLogNexus.Api.Hubs.AlertNotification)">
+            <summary>
+            Receives new alert triggered notification.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.IAlertHubClient.AlertAcknowledged(FMSLogNexus.Api.Hubs.AlertActionNotification)">
+            <summary>
+            Receives alert acknowledged notification.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.IAlertHubClient.AlertResolved(FMSLogNexus.Api.Hubs.AlertActionNotification)">
+            <summary>
+            Receives alert resolved notification.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.IAlertHubClient.AlertSummaryUpdated(FMSLogNexus.Api.Hubs.AlertSummaryNotification)">
+            <summary>
+            Receives alert summary update.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.IDashboardHubClient">
+            <summary>
+            Interface for dashboard hub client methods.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.IDashboardHubClient.DashboardUpdated(FMSLogNexus.Api.Hubs.DashboardNotification)">
+            <summary>
+            Receives dashboard summary update.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.IDashboardHubClient.SystemNotification(FMSLogNexus.Api.Hubs.SystemNotificationMessage)">
+            <summary>
+            Receives system notification.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.LogNotification">
+            <summary>
+            Log entry notification.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.LogStatsNotification">
+            <summary>
+            Log statistics notification.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.ExecutionNotification">
+            <summary>
+            Execution notification.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.ExecutionProgressNotification">
+            <summary>
+            Execution progress notification.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.JobStatusNotification">
+            <summary>
+            Job status notification.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.JobHealthNotification">
+            <summary>
+            Job health notification.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.ServerStatusNotification">
+            <summary>
+            Server status notification.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.ServerHeartbeatNotification">
+            <summary>
+            Server heartbeat notification.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.ServerMetricsNotification">
+            <summary>
+            Server metrics notification.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.AlertNotification">
+            <summary>
+            Alert notification.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.AlertActionNotification">
+            <summary>
+            Alert action notification.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.AlertSummaryNotification">
+            <summary>
+            Alert summary notification.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.DashboardNotification">
+            <summary>
+            Dashboard notification.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.SystemNotificationMessage">
+            <summary>
+            System notification message.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.LogSubscriptionOptions">
+            <summary>
+            Log subscription options.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.JobSubscriptionOptions">
+            <summary>
+            Job subscription options.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.ServerSubscriptionOptions">
+            <summary>
+            Server subscription options.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.AlertSubscriptionOptions">
+            <summary>
+            Alert subscription options.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.JobHub">
+            <summary>
+            Hub for real-time job execution updates.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.JobHub.SubscribeToAllJobs">
+            <summary>
+            Subscribes to all job updates.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.JobHub.UnsubscribeFromAllJobs">
+            <summary>
+            Unsubscribes from all job updates.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.JobHub.SubscribeToAllExecutions">
+            <summary>
+            Subscribes to all execution updates.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.JobHub.UnsubscribeFromAllExecutions">
+            <summary>
+            Unsubscribes from all execution updates.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.JobHub.SubscribeToJob(System.String)">
+            <summary>
+            Subscribes to updates for a specific job.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.JobHub.UnsubscribeFromJob(System.String)">
+            <summary>
+            Unsubscribes from updates for a specific job.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.JobHub.SubscribeToExecution(System.Guid)">
+            <summary>
+            Subscribes to updates for a specific execution.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.JobHub.UnsubscribeFromExecution(System.Guid)">
+            <summary>
+            Unsubscribes from updates for a specific execution.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.JobHub.SubscribeToServer(System.String)">
+            <summary>
+            Subscribes to jobs for a specific server.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.JobHub.UnsubscribeFromServer(System.String)">
+            <summary>
+            Unsubscribes from jobs for a specific server.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.JobHub.SubscribeToCriticalJobs">
+            <summary>
+            Subscribes to critical job updates.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.JobHub.UnsubscribeFromCriticalJobs">
+            <summary>
+            Unsubscribes from critical job updates.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.JobHub.SubscribeToHealthUpdates">
+            <summary>
+            Subscribes to job health updates.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.JobHub.UnsubscribeFromHealthUpdates">
+            <summary>
+            Unsubscribes from job health updates.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.IJobBroadcaster">
+            <summary>
+            Service for broadcasting job events to connected clients.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.JobBroadcaster">
+            <summary>
+            Implementation of job broadcaster using SignalR.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.LogHub">
+            <summary>
+            Hub for real-time log streaming.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.LogHub.SubscribeToAllLogs">
+            <summary>
+            Subscribes to all logs.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.LogHub.UnsubscribeFromAllLogs">
+            <summary>
+            Unsubscribes from all logs.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.LogHub.SubscribeToServer(System.String)">
+            <summary>
+            Subscribes to logs for a specific server.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.LogHub.UnsubscribeFromServer(System.String)">
+            <summary>
+            Unsubscribes from logs for a specific server.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.LogHub.SubscribeToJob(System.String)">
+            <summary>
+            Subscribes to logs for a specific job.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.LogHub.UnsubscribeFromJob(System.String)">
+            <summary>
+            Unsubscribes from logs for a specific job.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.LogHub.SubscribeToExecution(System.Guid)">
+            <summary>
+            Subscribes to logs for a specific execution.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.LogHub.UnsubscribeFromExecution(System.Guid)">
+            <summary>
+            Unsubscribes from logs for a specific execution.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.LogHub.SubscribeToErrors">
+            <summary>
+            Subscribes to error logs only.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.LogHub.UnsubscribeFromErrors">
+            <summary>
+            Unsubscribes from error logs.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.LogHub.SubscribeWithFilter(FMSLogNexus.Api.Hubs.LogSubscriptionOptions)">
+            <summary>
+            Subscribes with custom filter options.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.ILogBroadcaster">
+            <summary>
+            Service for broadcasting log events to connected clients.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.LogBroadcaster">
+            <summary>
+            Implementation of log broadcaster using SignalR.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.IRealTimeService">
+            <summary>
+            Unified real-time service interface for the application.
+            This service is used by the application layer to broadcast events
+            without knowing about SignalR specifics.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.RealTimeService">
+            <summary>
+            Implementation of the unified real-time service.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.ServerHub">
+            <summary>
+            Hub for real-time server status updates.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.ServerHub.SubscribeToAllServers">
+            <summary>
+            Subscribes to all server updates.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.ServerHub.UnsubscribeFromAllServers">
+            <summary>
+            Unsubscribes from all server updates.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.ServerHub.SubscribeToServer(System.String)">
+            <summary>
+            Subscribes to updates for a specific server.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.ServerHub.UnsubscribeFromServer(System.String)">
+            <summary>
+            Unsubscribes from updates for a specific server.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.ServerHub.SubscribeToHeartbeats">
+            <summary>
+            Subscribes to heartbeat notifications.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.ServerHub.UnsubscribeFromHeartbeats">
+            <summary>
+            Unsubscribes from heartbeat notifications.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.ServerHub.SubscribeToMetrics">
+            <summary>
+            Subscribes to server metrics updates.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.ServerHub.UnsubscribeFromMetrics">
+            <summary>
+            Unsubscribes from server metrics updates.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.ServerHub.SubscribeToOfflineAlerts">
+            <summary>
+            Subscribes to offline server alerts.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.ServerHub.UnsubscribeFromOfflineAlerts">
+            <summary>
+            Unsubscribes from offline server alerts.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.IServerBroadcaster">
+            <summary>
+            Service for broadcasting server events to connected clients.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.ServerBroadcaster">
+            <summary>
+            Implementation of server broadcaster using SignalR.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.SignalRExtensions">
+            <summary>
+            Extension methods for SignalR services registration.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.SignalRExtensions.AddSignalRHubs(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Microsoft.AspNetCore.SignalR.HubOptions})">
+            <summary>
+            Adds SignalR hub services to the service collection.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.SignalRExtensions.MapSignalRHubs(Microsoft.AspNetCore.Routing.IEndpointRouteBuilder)">
+            <summary>
+            Maps SignalR hub endpoints.
+            </summary>
+        </member>
+        <member name="M:FMSLogNexus.Api.Hubs.SignalRExtensions.AddRedisBackplane(Microsoft.AspNetCore.SignalR.ISignalRServerBuilder,System.String)">
+            <summary>
+            Configures SignalR with Redis backplane for scaling.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.HubLoggingFilter">
+            <summary>
+            Hub filter for logging and error handling.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Hubs.ClaimsUserIdProvider">
+            <summary>
+            Hub user ID provider based on claims.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Middleware.ExceptionHandlingMiddleware">
+            <summary>
+            Middleware for handling exceptions globally.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Middleware.ExceptionHandlingMiddlewareExtensions">
+            <summary>
+            Extension methods for exception handling middleware.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Middleware.RateLimitingMiddleware">
+            <summary>
+            Simple in-memory rate limiting middleware.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Middleware.RateLimitingOptions">
+            <summary>
+            Rate limiting configuration options.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Middleware.RateLimitingMiddlewareExtensions">
+            <summary>
+            Extension methods for rate limiting middleware.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Middleware.RequestLoggingMiddleware">
+            <summary>
+            Middleware for logging HTTP requests and responses.
+            </summary>
+        </member>
+        <member name="T:FMSLogNexus.Api.Middleware.RequestLoggingMiddlewareExtensions">
+            <summary>
+            Extension methods for request logging middleware.
+            </summary>
+        </member>
+    </members>
+</doc>

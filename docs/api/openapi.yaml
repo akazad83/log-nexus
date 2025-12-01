@@ -1,0 +1,1777 @@
+openapi: 3.0.3
+info:
+  title: FMS Log Nexus API
+  description: |
+    Centralized logging and monitoring platform API for FMS Log Nexus.
+    
+    ## Authentication
+    
+    The API supports two authentication methods:
+    - **JWT Bearer Token**: For dashboard users and interactive sessions
+    - **API Key**: For service accounts and job integrations
+    
+    ## Rate Limiting
+    
+    - Log ingestion: 10,000 requests/minute per API key
+    - Dashboard queries: 1,000 requests/minute per user
+    
+  version: 1.0.0
+  contact:
+    name: FMS Log Nexus Support
+    email: support@company.com
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://lognexus.company.com/api
+    description: Production server
+  - url: https://localhost:5001/api
+    description: Development server
+
+tags:
+  - name: Authentication
+    description: User authentication and token management
+  - name: Logs
+    description: Log entry ingestion and search
+  - name: Jobs
+    description: Job registration and execution management
+  - name: Dashboard
+    description: Dashboard statistics and trends
+  - name: Alerts
+    description: Alert definitions and instances
+  - name: System
+    description: System health and configuration
+
+security:
+  - bearerAuth: []
+  - apiKeyAuth: []
+
+paths:
+  # ============================================================================
+  # Authentication Endpoints
+  # ============================================================================
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Authenticate user
+      description: Authenticate with username and password to obtain JWT tokens
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/refresh:
+    post:
+      tags: [Authentication]
+      summary: Refresh access token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Invalid or expired refresh token
+
+  /auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user
+      responses:
+        '200':
+          description: Current user information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  # ============================================================================
+  # Logs Endpoints
+  # ============================================================================
+  /logs:
+    post:
+      tags: [Logs]
+      summary: Ingest single log entry
+      description: Submit a single log entry for processing
+      security:
+        - apiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogEntryRequest'
+      responses:
+        '202':
+          description: Log entry accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogEntryAcceptedResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags: [Logs]
+      summary: Search logs
+      description: Search and retrieve log entries with filtering and pagination
+      parameters:
+        - $ref: '#/components/parameters/StartDate'
+        - $ref: '#/components/parameters/EndDate'
+        - name: jobId
+          in: query
+          schema:
+            type: string
+          description: Filter by job ID
+        - name: jobExecutionId
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Filter by execution ID
+        - name: serverName
+          in: query
+          schema:
+            type: string
+          description: Filter by server name
+        - name: minLevel
+          in: query
+          schema:
+            $ref: '#/components/schemas/LogLevel'
+          description: Minimum log level
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Full-text search in message
+        - name: correlationId
+          in: query
+          schema:
+            type: string
+          description: Filter by correlation ID
+        - name: hasException
+          in: query
+          schema:
+            type: boolean
+          description: Filter entries with/without exceptions
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/SortBy'
+        - $ref: '#/components/parameters/SortOrder'
+      responses:
+        '200':
+          description: Log entries retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogEntriesResponse'
+
+  /logs/batch:
+    post:
+      tags: [Logs]
+      summary: Ingest batch of log entries
+      description: Submit multiple log entries (up to 1000) in a single request
+      security:
+        - apiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogBatchRequest'
+      responses:
+        '202':
+          description: Batch accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogBatchResponse'
+
+  /logs/{id}:
+    get:
+      tags: [Logs]
+      summary: Get log entry details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Log entry details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogEntryDetail'
+        '404':
+          description: Log entry not found
+
+  /logs/statistics:
+    get:
+      tags: [Logs]
+      summary: Get log statistics
+      parameters:
+        - $ref: '#/components/parameters/StartDate'
+        - $ref: '#/components/parameters/EndDate'
+        - name: jobId
+          in: query
+          schema:
+            type: string
+        - name: groupBy
+          in: query
+          schema:
+            type: string
+            enum: [hour, day, job, server]
+            default: hour
+      responses:
+        '200':
+          description: Log statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogStatistics'
+
+  # ============================================================================
+  # Jobs Endpoints
+  # ============================================================================
+  /jobs:
+    get:
+      tags: [Jobs]
+      summary: List jobs
+      parameters:
+        - name: serverName
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: isActive
+          in: query
+          schema:
+            type: boolean
+            default: true
+        - name: search
+          in: query
+          schema:
+            type: string
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: List of jobs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobsResponse'
+
+    post:
+      tags: [Jobs]
+      summary: Create/register job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobCreateRequest'
+      responses:
+        '201':
+          description: Job created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+
+  /jobs/{jobId}:
+    get:
+      tags: [Jobs]
+      summary: Get job details
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Job details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobDetail'
+        '404':
+          description: Job not found
+
+    put:
+      tags: [Jobs]
+      summary: Update job
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobUpdateRequest'
+      responses:
+        '200':
+          description: Job updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+
+  /jobs/{jobId}/executions:
+    get:
+      tags: [Jobs]
+      summary: Get job execution history
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/StartDate'
+        - $ref: '#/components/parameters/EndDate'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/JobStatus'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Execution history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionsResponse'
+
+    post:
+      tags: [Jobs]
+      summary: Start job execution
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartExecutionRequest'
+      responses:
+        '201':
+          description: Execution started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionCreatedResponse'
+
+  /jobs/executions/{id}:
+    get:
+      tags: [Jobs]
+      summary: Get execution details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Execution details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionDetail'
+
+    put:
+      tags: [Jobs]
+      summary: Update/complete execution
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateExecutionRequest'
+      responses:
+        '200':
+          description: Execution updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionUpdatedResponse'
+
+  # ============================================================================
+  # Dashboard Endpoints
+  # ============================================================================
+  /dashboard/summary:
+    get:
+      tags: [Dashboard]
+      summary: Get dashboard statistics
+      responses:
+        '200':
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardSummary'
+
+  /dashboard/trends:
+    get:
+      tags: [Dashboard]
+      summary: Get log trends
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [1h, 6h, 24h, 7d, 30d]
+            default: 24h
+        - name: interval
+          in: query
+          schema:
+            type: string
+            enum: [minute, hour, day]
+      responses:
+        '200':
+          description: Log trends
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogTrends'
+
+  /dashboard/jobs/health:
+    get:
+      tags: [Dashboard]
+      summary: Get job health overview
+      responses:
+        '200':
+          description: Job health overview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobHealthOverview'
+
+  /dashboard/servers/status:
+    get:
+      tags: [Dashboard]
+      summary: Get server status
+      responses:
+        '200':
+          description: Server status overview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerStatusOverview'
+
+  /dashboard/recent-errors:
+    get:
+      tags: [Dashboard]
+      summary: Get recent errors
+      parameters:
+        - name: count
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: Recent errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecentErrors'
+
+  # ============================================================================
+  # Alerts Endpoints
+  # ============================================================================
+  /alerts:
+    get:
+      tags: [Alerts]
+      summary: List alert definitions
+      responses:
+        '200':
+          description: Alert definitions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertsResponse'
+
+    post:
+      tags: [Alerts]
+      summary: Create alert
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlertCreateRequest'
+      responses:
+        '201':
+          description: Alert created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Alert'
+
+  /alerts/{id}:
+    get:
+      tags: [Alerts]
+      summary: Get alert details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Alert details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertDetail'
+
+    put:
+      tags: [Alerts]
+      summary: Update alert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AlertUpdateRequest'
+      responses:
+        '200':
+          description: Alert updated
+
+    delete:
+      tags: [Alerts]
+      summary: Delete alert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Alert deleted
+
+  /alerts/instances:
+    get:
+      tags: [Alerts]
+      summary: List alert instances
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [New, Acknowledged, Resolved]
+        - name: severity
+          in: query
+          schema:
+            $ref: '#/components/schemas/AlertSeverity'
+        - $ref: '#/components/parameters/StartDate'
+        - $ref: '#/components/parameters/EndDate'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: Alert instances
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertInstancesResponse'
+
+  /alerts/instances/{id}/acknowledge:
+    post:
+      tags: [Alerts]
+      summary: Acknowledge alert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcknowledgeRequest'
+      responses:
+        '200':
+          description: Alert acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertInstanceStatusResponse'
+
+  /alerts/instances/{id}/resolve:
+    post:
+      tags: [Alerts]
+      summary: Resolve alert
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResolveRequest'
+      responses:
+        '200':
+          description: Alert resolved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AlertInstanceStatusResponse'
+
+  # ============================================================================
+  # System Endpoints
+  # ============================================================================
+  /system/health:
+    get:
+      tags: [System]
+      summary: Health check
+      security: []
+      responses:
+        '200':
+          description: System health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckResponse'
+
+  /system/servers:
+    get:
+      tags: [System]
+      summary: List servers
+      responses:
+        '200':
+          description: Server list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServersResponse'
+
+  /system/servers/heartbeat:
+    post:
+      tags: [System]
+      summary: Server heartbeat
+      security:
+        - apiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HeartbeatRequest'
+      responses:
+        '200':
+          description: Heartbeat accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HeartbeatResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT Bearer token for user authentication
+
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for service authentication
+
+  parameters:
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      description: Page number
+
+    PageSize:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 1000
+        default: 50
+      description: Items per page
+
+    SortBy:
+      name: sortBy
+      in: query
+      schema:
+        type: string
+        default: timestamp
+      description: Field to sort by
+
+    SortOrder:
+      name: sortOrder
+      in: query
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: desc
+      description: Sort order
+
+    StartDate:
+      name: startDate
+      in: query
+      schema:
+        type: string
+        format: date-time
+      description: Start of time range (ISO 8601)
+
+    EndDate:
+      name: endDate
+      in: query
+      schema:
+        type: string
+        format: date-time
+      description: End of time range (ISO 8601)
+
+  schemas:
+    # ========== Enums ==========
+    LogLevel:
+      type: string
+      enum: [Trace, Debug, Information, Warning, Error, Critical]
+
+    JobStatus:
+      type: string
+      enum: [Pending, Running, Completed, Failed, Cancelled, Timeout, Warning]
+
+    JobType:
+      type: string
+      enum: [Unknown, Executable, PowerShell, VBScript, DotNetAssembly, SqlJob, WindowsService, Other]
+
+    ServerStatus:
+      type: string
+      enum: [Unknown, Online, Offline, Degraded]
+
+    AlertSeverity:
+      type: string
+      enum: [Low, Medium, High, Critical]
+
+    AlertType:
+      type: string
+      enum: [ErrorThreshold, JobFailure, ServerOffline, PerformanceWarning, CustomQuery, PatternMatch]
+
+    # ========== Common ==========
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalPages:
+          type: integer
+        totalCount:
+          type: integer
+        hasNextPage:
+          type: boolean
+        hasPreviousPage:
+          type: boolean
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  message:
+                    type: string
+            traceId:
+              type: string
+
+    # ========== Auth ==========
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+          example: admin
+        password:
+          type: string
+          format: password
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        tokenType:
+          type: string
+          default: Bearer
+        expiresIn:
+          type: integer
+          description: Token expiration in seconds
+        user:
+          $ref: '#/components/schemas/User'
+
+    RefreshTokenRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+
+    TokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        tokenType:
+          type: string
+        expiresIn:
+          type: integer
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        displayName:
+          type: string
+        role:
+          type: string
+
+    # ========== Logs ==========
+    LogEntryRequest:
+      type: object
+      required: [level, message, serverName]
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        level:
+          $ref: '#/components/schemas/LogLevel'
+        message:
+          type: string
+          maxLength: 4000
+        messageTemplate:
+          type: string
+        jobId:
+          type: string
+        jobExecutionId:
+          type: string
+          format: uuid
+        serverName:
+          type: string
+        category:
+          type: string
+        correlationId:
+          type: string
+        exception:
+          type: object
+          properties:
+            type:
+              type: string
+            message:
+              type: string
+            stackTrace:
+              type: string
+        properties:
+          type: object
+          additionalProperties: true
+        tags:
+          type: array
+          items:
+            type: string
+
+    LogEntryAcceptedResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        message:
+          type: string
+
+    LogBatchRequest:
+      type: object
+      required: [entries]
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogEntryRequest'
+          maxItems: 1000
+
+    LogBatchResponse:
+      type: object
+      properties:
+        accepted:
+          type: integer
+        rejected:
+          type: integer
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              index:
+                type: integer
+              field:
+                type: string
+              message:
+                type: string
+
+    LogEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        level:
+          $ref: '#/components/schemas/LogLevel'
+        levelName:
+          type: string
+        message:
+          type: string
+        jobId:
+          type: string
+        jobExecutionId:
+          type: string
+          format: uuid
+        serverName:
+          type: string
+        category:
+          type: string
+        correlationId:
+          type: string
+        exceptionType:
+          type: string
+        exceptionMessage:
+          type: string
+        hasException:
+          type: boolean
+        properties:
+          type: object
+        tags:
+          type: array
+          items:
+            type: string
+
+    LogEntryDetail:
+      allOf:
+        - $ref: '#/components/schemas/LogEntry'
+        - type: object
+          properties:
+            messageTemplate:
+              type: string
+            jobDisplayName:
+              type: string
+            serverDisplayName:
+              type: string
+            sourceContext:
+              type: string
+            traceId:
+              type: string
+            spanId:
+              type: string
+            exception:
+              type: object
+              properties:
+                type:
+                  type: string
+                message:
+                  type: string
+                stackTrace:
+                  type: string
+                source:
+                  type: string
+            relatedLogs:
+              type: array
+              items:
+                $ref: '#/components/schemas/LogEntry'
+
+    LogEntriesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogEntry'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    LogStatistics:
+      type: object
+      properties:
+        summary:
+          type: object
+          properties:
+            totalLogs:
+              type: integer
+            traceCount:
+              type: integer
+            debugCount:
+              type: integer
+            infoCount:
+              type: integer
+            warningCount:
+              type: integer
+            errorCount:
+              type: integer
+            criticalCount:
+              type: integer
+            exceptionCount:
+              type: integer
+        trend:
+          type: array
+          items:
+            type: object
+            properties:
+              bucket:
+                type: string
+                format: date-time
+              total:
+                type: integer
+              info:
+                type: integer
+              warning:
+                type: integer
+              error:
+                type: integer
+        topExceptions:
+          type: array
+          items:
+            type: object
+            properties:
+              exceptionType:
+                type: string
+              count:
+                type: integer
+              affectedJobs:
+                type: integer
+
+    # ========== Jobs ==========
+    Job:
+      type: object
+      properties:
+        jobId:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        jobType:
+          $ref: '#/components/schemas/JobType'
+        serverName:
+          type: string
+        isActive:
+          type: boolean
+        isCritical:
+          type: boolean
+        lastExecutionAt:
+          type: string
+          format: date-time
+        lastStatus:
+          $ref: '#/components/schemas/JobStatus'
+        healthScore:
+          type: integer
+          minimum: 0
+          maximum: 100
+
+    JobDetail:
+      allOf:
+        - $ref: '#/components/schemas/Job'
+        - type: object
+          properties:
+            executablePath:
+              type: string
+            schedule:
+              type: string
+            scheduleDescription:
+              type: string
+            configuration:
+              type: object
+            statistics:
+              type: object
+              properties:
+                totalExecutions:
+                  type: integer
+                successCount:
+                  type: integer
+                failureCount:
+                  type: integer
+                successRate:
+                  type: number
+                avgDurationMs:
+                  type: integer
+            recentExecutions:
+              type: array
+              items:
+                $ref: '#/components/schemas/Execution'
+
+    JobCreateRequest:
+      type: object
+      required: [jobId, displayName]
+      properties:
+        jobId:
+          type: string
+          maxLength: 100
+        displayName:
+          type: string
+          maxLength: 200
+        description:
+          type: string
+        category:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        jobType:
+          $ref: '#/components/schemas/JobType'
+        serverName:
+          type: string
+        executablePath:
+          type: string
+        schedule:
+          type: string
+        isCritical:
+          type: boolean
+        configuration:
+          type: object
+
+    JobUpdateRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+        isCritical:
+          type: boolean
+
+    JobsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Job'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    # ========== Executions ==========
+    Execution:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        jobId:
+          type: string
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: string
+          format: date-time
+        durationMs:
+          type: integer
+        durationFormatted:
+          type: string
+        status:
+          $ref: '#/components/schemas/JobStatus'
+        serverName:
+          type: string
+        logCount:
+          type: integer
+        errorCount:
+          type: integer
+        warningCount:
+          type: integer
+
+    ExecutionDetail:
+      allOf:
+        - $ref: '#/components/schemas/Execution'
+        - type: object
+          properties:
+            jobDisplayName:
+              type: string
+            triggerType:
+              type: string
+            triggeredBy:
+              type: string
+            correlationId:
+              type: string
+            parameters:
+              type: object
+            resultSummary:
+              type: object
+            errorMessage:
+              type: string
+
+    StartExecutionRequest:
+      type: object
+      required: [serverName]
+      properties:
+        serverName:
+          type: string
+        triggerType:
+          type: string
+          default: Manual
+        triggeredBy:
+          type: string
+        correlationId:
+          type: string
+        parameters:
+          type: object
+
+    ExecutionCreatedResponse:
+      type: object
+      properties:
+        executionId:
+          type: string
+          format: uuid
+        jobId:
+          type: string
+        correlationId:
+          type: string
+        serverName:
+          type: string
+        startedAt:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/JobStatus'
+
+    UpdateExecutionRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          $ref: '#/components/schemas/JobStatus'
+        resultSummary:
+          type: object
+        resultCode:
+          type: integer
+        errorMessage:
+          type: string
+        errorCategory:
+          type: string
+
+    ExecutionUpdatedResponse:
+      type: object
+      properties:
+        executionId:
+          type: string
+          format: uuid
+        jobId:
+          type: string
+        status:
+          $ref: '#/components/schemas/JobStatus'
+        durationMs:
+          type: integer
+        durationFormatted:
+          type: string
+
+    ExecutionsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Execution'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    # ========== Dashboard ==========
+    DashboardSummary:
+      type: object
+      properties:
+        logs:
+          type: object
+          properties:
+            last24Hours:
+              type: integer
+            errors:
+              type: integer
+            warnings:
+              type: integer
+        jobs:
+          type: object
+          properties:
+            total:
+              type: integer
+            active:
+              type: integer
+            running:
+              type: integer
+            failedLast24Hours:
+              type: integer
+        servers:
+          type: object
+          properties:
+            total:
+              type: integer
+            online:
+              type: integer
+            offline:
+              type: integer
+        alerts:
+          type: object
+          properties:
+            unacknowledged:
+              type: integer
+            critical:
+              type: integer
+        generatedAt:
+          type: string
+          format: date-time
+
+    LogTrends:
+      type: object
+      properties:
+        period:
+          type: string
+        interval:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              timestamp:
+                type: string
+                format: date-time
+              total:
+                type: integer
+              info:
+                type: integer
+              warning:
+                type: integer
+              error:
+                type: integer
+
+    JobHealthOverview:
+      type: object
+      properties:
+        summary:
+          type: object
+          properties:
+            healthy:
+              type: integer
+            warning:
+              type: integer
+            critical:
+              type: integer
+        jobs:
+          type: array
+          items:
+            type: object
+            properties:
+              jobId:
+                type: string
+              displayName:
+                type: string
+              healthScore:
+                type: integer
+              healthStatus:
+                type: string
+              lastStatus:
+                $ref: '#/components/schemas/JobStatus'
+
+    ServerStatusOverview:
+      type: object
+      properties:
+        servers:
+          type: array
+          items:
+            type: object
+            properties:
+              serverName:
+                type: string
+              displayName:
+                type: string
+              status:
+                $ref: '#/components/schemas/ServerStatus'
+              lastHeartbeat:
+                type: string
+                format: date-time
+              activeJobCount:
+                type: integer
+              runningJobCount:
+                type: integer
+
+    RecentErrors:
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogEntry'
+
+    # ========== Alerts ==========
+    Alert:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        alertType:
+          $ref: '#/components/schemas/AlertType'
+        severity:
+          $ref: '#/components/schemas/AlertSeverity'
+        isActive:
+          type: boolean
+        throttleMinutes:
+          type: integer
+        lastTriggeredAt:
+          type: string
+          format: date-time
+        triggerCount:
+          type: integer
+
+    AlertDetail:
+      allOf:
+        - $ref: '#/components/schemas/Alert'
+        - type: object
+          properties:
+            condition:
+              type: object
+            notificationChannels:
+              type: object
+            jobId:
+              type: string
+            serverName:
+              type: string
+            createdAt:
+              type: string
+              format: date-time
+            createdBy:
+              type: string
+
+    AlertCreateRequest:
+      type: object
+      required: [name, alertType, severity, condition]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        alertType:
+          $ref: '#/components/schemas/AlertType'
+        severity:
+          $ref: '#/components/schemas/AlertSeverity'
+        condition:
+          type: object
+        throttleMinutes:
+          type: integer
+          default: 15
+        notificationChannels:
+          type: object
+        jobId:
+          type: string
+        serverName:
+          type: string
+        isActive:
+          type: boolean
+          default: true
+
+    AlertUpdateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        severity:
+          $ref: '#/components/schemas/AlertSeverity'
+        condition:
+          type: object
+        throttleMinutes:
+          type: integer
+        notificationChannels:
+          type: object
+        isActive:
+          type: boolean
+
+    AlertsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Alert'
+
+    AlertInstance:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        alertId:
+          type: string
+          format: uuid
+        alertName:
+          type: string
+        triggeredAt:
+          type: string
+          format: date-time
+        message:
+          type: string
+        severity:
+          $ref: '#/components/schemas/AlertSeverity'
+        status:
+          type: string
+          enum: [New, Acknowledged, Resolved, Suppressed]
+        acknowledgedAt:
+          type: string
+          format: date-time
+        acknowledgedBy:
+          type: string
+        resolvedAt:
+          type: string
+          format: date-time
+        resolvedBy:
+          type: string
+
+    AlertInstancesResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertInstance'
+        summary:
+          type: object
+          properties:
+            new:
+              type: integer
+            acknowledged:
+              type: integer
+            resolved:
+              type: integer
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    AcknowledgeRequest:
+      type: object
+      properties:
+        note:
+          type: string
+
+    ResolveRequest:
+      type: object
+      properties:
+        note:
+          type: string
+
+    AlertInstanceStatusResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        acknowledgedAt:
+          type: string
+          format: date-time
+        resolvedAt:
+          type: string
+          format: date-time
+
+    # ========== System ==========
+    HealthCheckResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [Healthy, Degraded, Unhealthy]
+        totalDuration:
+          type: string
+        entries:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              status:
+                type: string
+              duration:
+                type: string
+              data:
+                type: object
+
+    Server:
+      type: object
+      properties:
+        serverName:
+          type: string
+        displayName:
+          type: string
+        ipAddress:
+          type: string
+        status:
+          $ref: '#/components/schemas/ServerStatus'
+        lastHeartbeat:
+          type: string
+          format: date-time
+        agentVersion:
+          type: string
+        agentType:
+          type: string
+        isActive:
+          type: boolean
+
+    ServersResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Server'
+
+    HeartbeatRequest:
+      type: object
+      required: [serverName]
+      properties:
+        serverName:
+          type: string
+        ipAddress:
+          type: string
+        agentVersion:
+          type: string
+        agentType:
+          type: string
+        metadata:
+          type: object
+
+    HeartbeatResponse:
+      type: object
+      properties:
+        serverName:
+          type: string
+        status:
+          $ref: '#/components/schemas/ServerStatus'
+        lastHeartbeat:
+          type: string
+          format: date-time
